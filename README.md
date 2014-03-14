@@ -1,4 +1,4 @@
-jprogressmonitor
+progressmonitor
 ================
 
-Simple progress monitoring for java
+Simple progress monitoring.
