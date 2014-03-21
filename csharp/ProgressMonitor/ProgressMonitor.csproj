@@ -40,7 +40,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProgressMonitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="simple\console\widget\Bar.cs" />
+    <Compile Include="simple\console\ConsoleSimpleProgressMonitor.cs" />
+    <Compile Include="simple\console\widget\ConsoleWidget.cs" />
+    <Compile Include="simple\console\widget\ETA.cs" />
+    <Compile Include="simple\console\widget\Percentage.cs" />
+    <Compile Include="simple\console\widget\StepName.cs" />
+    <Compile Include="simple\SimpleProgressMonitor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
