@@ -1,5 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
+using org.pescuma.progressmonitor.flat;
 using org.pescuma.progressmonitor.simple;
 
 namespace org.pescuma.progressmonitor
@@ -15,13 +16,22 @@ namespace org.pescuma.progressmonitor
 		{
 			flat = new Mock<FlatProgressMonitor>();
 
-			progress = new FlatToHierarchicalProgressMonitor(flat.Object);
+			progress = new FlatToHierarchicalProgressMonitor(null, flat.Object);
+		}
+
+		[Test]
+		public void TestConfigure()
+		{
+			progress.ConfigureSteps(1);
+
+			flat.Verify(f => f.SetCurrent(0, 1000, ""), Times.Never);
 		}
 
 		[Test]
 		public void TestStart()
 		{
-			progress.Start(1);
+			progress.ConfigureSteps(1);
+			progress.StartStep();
 
 			flat.Verify(f => f.SetCurrent(0, 1000, ""));
 		}
@@ -29,7 +39,7 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestFinished()
 		{
-			progress.Start(1);
+			progress.ConfigureSteps(1);
 			progress.Finished();
 
 			flat.Verify(f => f.SetCurrent(1000, 1000, ""));
@@ -38,8 +48,9 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void Test2Steps()
 		{
-			progress.Start(2);
-			progress.NextStep();
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+			progress.StartStep();
 
 			flat.Verify(f => f.SetCurrent(500, 1000, ""));
 		}
@@ -47,8 +58,9 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void Test2Steps19()
 		{
-			progress.Start(1, 9);
-			progress.NextStep();
+			progress.ConfigureSteps(1, 9);
+			progress.StartStep();
+			progress.StartStep();
 
 			flat.Verify(f => f.SetCurrent(100, 1000, ""));
 		}
@@ -56,9 +68,10 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void Test2Steps172()
 		{
-			progress.Start(1, 7, 2);
-			progress.NextStep();
-			progress.NextStep();
+			progress.ConfigureSteps(1, 7, 2);
+			progress.StartStep();
+			progress.StartStep();
+			progress.StartStep();
 
 			flat.Verify(f => f.SetCurrent(800, 1000, ""));
 		}
@@ -66,29 +79,33 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestStepName()
 		{
-			progress.Start(1);
-			progress.SetStepName("A");
+			progress.ConfigureSteps(1);
+			progress.StartStep("A");
 
 			flat.Verify(f => f.SetCurrent(0, 1000, "A"));
 		}
 
 		[Test]
-		public void TestSubStep_Start()
+		public void TestSubStep_ConfigureDoesntPropagate()
 		{
-			progress.Start(2);
-			progress.CreateSubMonitor()
-				.Start(2);
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+
+			var sub = progress.CreateSubMonitor();
+			sub.ConfigureSteps(2);
 
 			flat.Verify(f => f.SetCurrent(0, 1000, ""), Times.Once);
+			flat.Verify(f => f.SetCurrent(500, 1000, ""), Times.Never);
 		}
 
 		[Test]
 		public void TestSubStep_FinishDoesntPropagate()
 		{
-			progress.Start(2);
+			progress.ConfigureSteps(2);
+			progress.StartStep();
 
 			var sub = progress.CreateSubMonitor();
-			sub.Start(2);
+			sub.ConfigureSteps(2);
 			sub.Finished();
 
 			flat.Verify(f => f.SetCurrent(500, 1000, ""), Times.Never);
@@ -97,11 +114,13 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestSubStep_StepPropagates()
 		{
-			progress.Start(2);
+			progress.ConfigureSteps(2);
+			progress.StartStep();
 
 			var sub = progress.CreateSubMonitor();
-			sub.Start(2);
-			sub.NextStep();
+			sub.ConfigureSteps(2);
+			sub.StartStep();
+			sub.StartStep();
 
 			flat.Verify(f => f.SetCurrent(250, 1000, ""));
 		}
@@ -109,12 +128,12 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestSubStep_SetStepNamePropagates()
 		{
-			progress.Start(2);
-			progress.SetStepName("A");
+			progress.ConfigureSteps(2);
+			progress.StartStep("A");
 
 			var sub = progress.CreateSubMonitor();
-			sub.Start(2);
-			sub.SetStepName("B");
+			sub.ConfigureSteps(2);
+			sub.StartStep("B");
 
 			flat.Verify(f => f.SetCurrent(0, 1000, "A - B"));
 		}

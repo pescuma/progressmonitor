@@ -1,4 +1,4 @@
-﻿using org.pescuma.progressmonitor.simple.console;
+﻿using org.pescuma.progressmonitor.flat.console;
 
 namespace org.pescuma.progressmonitor
 {

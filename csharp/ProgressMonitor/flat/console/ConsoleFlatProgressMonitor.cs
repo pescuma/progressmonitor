@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using org.pescuma.progressmonitor.simple.console.widget;
+using org.pescuma.progressmonitor.flat.console.widget;
 
-namespace org.pescuma.progressmonitor.simple.console
+namespace org.pescuma.progressmonitor.flat.console
 {
 	public class ConsoleFlatProgressMonitor : FlatProgressMonitor
 	{
@@ -14,7 +14,7 @@ namespace org.pescuma.progressmonitor.simple.console
 		private int? lastTickCount;
 		private int lastCurrent;
 		private int lastTotal;
-		private float lastPercent;
+		private double lastPercent;
 		private string lastStepName;
 
 		private int ConsoleWidth
@@ -29,17 +29,19 @@ namespace org.pescuma.progressmonitor.simple.console
 
 			var finished = (current >= total);
 			var tickCount = Environment.TickCount;
-			var percent = ComputePercent(current, total);
+			var percent = current / (double) total;
 
 			var output = false;
 			if (finished)
 				output = true;
 			else if (lastTickCount == null)
 				output = true;
+			else if ((stepName ?? "") != (lastStepName ?? ""))
+				output = true;
 			else if (lastTickCount.Value + MIN_UPDATE_TIME_MS > tickCount)
 // ReSharper disable once RedundantAssignment
 				output = false;
-			else if (percent > lastPercent || stepName != lastStepName)
+			else if (percent > lastPercent)
 				output = true;
 
 			if (!output)
@@ -92,7 +94,7 @@ namespace org.pescuma.progressmonitor.simple.console
 			var widgetsToGrow = used.Count(w => w.Grow);
 			if (widgetsToGrow > 0)
 			{
-				var toGrow = ConsoleWidth - used.Count - used.Sum(w => widths[w]);
+				var toGrow = ConsoleWidth - (used.Count - 1) - used.Sum(w => widths[w]);
 
 				var each = toGrow / widgetsToGrow;
 				foreach (var w in used.Where(w => w.Grow))
@@ -111,11 +113,6 @@ namespace org.pescuma.progressmonitor.simple.console
 				var w = used[i];
 				w.Output(Console.Write, widths[w], lastCurrent, lastTotal, lastPercent, lastStepName);
 			}
-		}
-
-		private static float ComputePercent(int current, int total)
-		{
-			return (float) Math.Round((current / (float) total) * 100 * 10) / 10;
 		}
 
 		public void Report(params string[] message)

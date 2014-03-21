@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using org.pescuma.progressmonitor.simple;
+using org.pescuma.progressmonitor.flat;
 
 namespace org.pescuma.progressmonitor
 {
@@ -27,9 +27,10 @@ namespace org.pescuma.progressmonitor
 			this.monitor = monitor;
 		}
 
-		public IDisposable Start(params int[] aSteps)
+		public IDisposable ConfigureSteps(params int[] aSteps)
 		{
-			CheckNotStarted();
+			CheckNotConfigured();
+
 			if (aSteps.Length < 1)
 				throw new ArgumentException();
 			if (aSteps.Any(v => v < 1))
@@ -46,29 +47,14 @@ namespace org.pescuma.progressmonitor
 				steps = aSteps;
 			}
 
-			currentStep = 0;
-
-			if (parent == null)
-				Propagate();
+			currentStep = -1;
 
 			return new ActionDisposable(Finished);
 		}
 
-		public void SetStepName(string stepName)
+		public void StartStep(string stepName = null)
 		{
-			CheckStarted();
-
-			if (Equals(currentStepName, stepName))
-				return;
-
-			currentStepName = stepName;
-
-			Propagate();
-		}
-
-		public void NextStep(string stepName = null)
-		{
-			CheckStarted();
+			CheckConfigured();
 
 			if (currentStep + 1 >= steps.Length)
 				throw new ArgumentException();
@@ -81,7 +67,7 @@ namespace org.pescuma.progressmonitor
 
 		public void Finished()
 		{
-			CheckStarted();
+			CheckConfigured();
 
 			steps = null;
 
@@ -143,16 +129,24 @@ namespace org.pescuma.progressmonitor
 			return string.Join(" - ", names);
 		}
 
-		private void CheckNotStarted()
+		private void CheckNotConfigured()
 		{
 			if (steps != null)
-				throw new InvalidOperationException("Already started");
+				throw new InvalidOperationException("Already configured");
+		}
+
+		private void CheckConfigured()
+		{
+			if (steps == null)
+				throw new InvalidOperationException("Not configured yet or already finished");
 		}
 
 		private void CheckStarted()
 		{
-			if (steps == null)
-				throw new InvalidOperationException("Not started or already finished");
+			CheckConfigured();
+
+			if (currentStep < 0)
+				throw new InvalidOperationException("Not started yet");
 		}
 
 		public void Report(params string[] message)

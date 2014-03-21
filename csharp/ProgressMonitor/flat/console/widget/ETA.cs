@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace org.pescuma.progressmonitor.simple.console.widget
+namespace org.pescuma.progressmonitor.flat.console.widget
 {
 	public class ETA : ConsoleWidget
 	{
@@ -17,7 +17,7 @@ namespace org.pescuma.progressmonitor.simple.console.widget
 			get { return false; }
 		}
 
-		public int ComputeSize(int current, int total, float percent, string stepName)
+		public int ComputeSize(int current, int total, double percent, string stepName)
 		{
 			if (percent < 0.5)
 				return 0;
@@ -27,16 +27,16 @@ namespace org.pescuma.progressmonitor.simple.console.widget
 			return eta.Length;
 		}
 
-		public void Output(Action<string> writer, int width, int current, int total, float percent, string stepName)
+		public void Output(Action<string> writer, int width, int current, int total, double percent, string stepName)
 		{
 			writer(eta);
 		}
 
 		// HACK public for tests
-		public static string ComputeETA(TimeSpan elapsed, float percent)
+		public static string ComputeETA(TimeSpan elapsed, double percent)
 		{
 			var passed = elapsed.TotalMilliseconds / 1000;
-			var total = passed / (percent / 100);
+			var total = passed / percent;
 			var toGo = (int) Math.Round(total - passed);
 
 			var result = "";

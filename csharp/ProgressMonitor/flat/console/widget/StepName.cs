@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace org.pescuma.progressmonitor.simple.console.widget
+namespace org.pescuma.progressmonitor.flat.console.widget
 {
 	public class StepName : ConsoleWidget
 	{
@@ -13,7 +13,7 @@ namespace org.pescuma.progressmonitor.simple.console.widget
 			get { return false; }
 		}
 
-		public int ComputeSize(int current, int total, float percent, string stepName)
+		public int ComputeSize(int current, int total, double percent, string stepName)
 		{
 			if (string.IsNullOrWhiteSpace(stepName))
 				return 0;
@@ -21,7 +21,7 @@ namespace org.pescuma.progressmonitor.simple.console.widget
 				return stepName.Length;
 		}
 
-		public void Output(Action<string> writer, int width, int current, int total, float percent, string stepName)
+		public void Output(Action<string> writer, int width, int current, int total, double percent, string stepName)
 		{
 			writer(stepName);
 		}

@@ -1,4 +1,4 @@
-﻿namespace org.pescuma.progressmonitor.simple
+﻿namespace org.pescuma.progressmonitor.flat
 {
 	/// <summary>
 	/// A simple progress monitor, that doesn't allow sub-steps.

@@ -48,7 +48,7 @@
   <ItemGroup>
     <Compile Include="FlatToHierarchicalProgressMonitorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="simple\console\widget\ETATest.cs" />
+    <Compile Include="flat\console\widget\ETATest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
