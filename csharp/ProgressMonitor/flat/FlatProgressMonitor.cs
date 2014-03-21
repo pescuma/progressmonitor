@@ -5,7 +5,7 @@
 	/// 
 	/// Usually used internally by progress monitors.
 	/// </summary>
-	public interface SimpleProgressMonitor
+	public interface FlatProgressMonitor
 	{
 		/// <summary>
 		/// Sets the current process stage.

@@ -42,13 +42,13 @@
   <ItemGroup>
     <Compile Include="ProgressMonitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="simple\console\widget\Bar.cs" />
-    <Compile Include="simple\console\ConsoleSimpleProgressMonitor.cs" />
-    <Compile Include="simple\console\widget\ConsoleWidget.cs" />
-    <Compile Include="simple\console\widget\ETA.cs" />
-    <Compile Include="simple\console\widget\Percentage.cs" />
-    <Compile Include="simple\console\widget\StepName.cs" />
-    <Compile Include="simple\SimpleProgressMonitor.cs" />
+    <Compile Include="flat\console\widget\Bar.cs" />
+    <Compile Include="flat\console\ConsoleFlatProgressMonitor.cs" />
+    <Compile Include="flat\console\widget\ConsoleWidget.cs" />
+    <Compile Include="flat\console\widget\ETA.cs" />
+    <Compile Include="flat\console\widget\Percentage.cs" />
+    <Compile Include="flat\console\widget\StepName.cs" />
+    <Compile Include="flat\FlatProgressMonitor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

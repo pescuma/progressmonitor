@@ -21,11 +21,9 @@ namespace org.pescuma.progressmonitor.simple.console.widget
 				return stepName.Length;
 		}
 
-		public int OutputToConsole(int width, int current, int total, float percent, string stepName)
+		public void Output(Action<string> writer, int width, int current, int total, float percent, string stepName)
 		{
-			Console.Write(stepName);
-
-			return stepName.Length;
+			writer(stepName);
 		}
 	}
 }

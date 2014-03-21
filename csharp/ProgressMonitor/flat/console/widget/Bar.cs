@@ -18,21 +18,19 @@ namespace org.pescuma.progressmonitor.simple.console.widget
 			return 5;
 		}
 
-		public int OutputToConsole(int width, int current, int total, float percent, string stepName)
+		public void Output(Action<string> writer, int width, int current, int total, float percent, string stepName)
 		{
-			Console.Write("[");
+			writer("[");
 
 			var hashWidth = (int) Math.Round((width - 2) * percent);
 			if (hashWidth > 0)
-				Console.Write(new String('#', hashWidth));
+				writer(new String('#', hashWidth));
 
 			var spaceWidth = width - 2 - hashWidth;
 			if (spaceWidth > 0)
-				Console.Write(new String(' ', spaceWidth));
+				writer(new String(' ', spaceWidth));
 
-			Console.Write("]");
-
-			return width;
+			writer("]");
 		}
 	}
 }

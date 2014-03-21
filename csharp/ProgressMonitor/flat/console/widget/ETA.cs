@@ -22,33 +22,32 @@ namespace org.pescuma.progressmonitor.simple.console.widget
 			if (percent < 0.5)
 				return 0;
 
-			eta = ComputeETA(percent);
-			return eta.Length;
-		}
-
-		public int OutputToConsole(int width, int current, int total, float percent, string stepName)
-		{
-			Console.Write(eta);
+			eta = ComputeETA(DateTime.Now - start, percent);
 
 			return eta.Length;
 		}
 
-		private string ComputeETA(float percent)
+		public void Output(Action<string> writer, int width, int current, int total, float percent, string stepName)
 		{
-			var now = DateTime.Now;
-			var passed = (now - start).TotalMilliseconds / 1000;
+			writer(eta);
+		}
+
+		// HACK public for tests
+		public static string ComputeETA(TimeSpan elapsed, float percent)
+		{
+			var passed = elapsed.TotalMilliseconds / 1000;
 			var total = passed / (percent / 100);
-			var toGo = total - passed;
+			var toGo = (int) Math.Round(total - passed);
 
 			var result = "";
 			Append(ref result, ref toGo, 60, "s");
 			Append(ref result, ref toGo, 60, "m");
-			Append(ref result, ref toGo, 60, "h");
+			Append(ref result, ref toGo, 24, "h");
 			Append(ref result, ref toGo, 0, "d");
 			return result;
 		}
 
-		private void Append(ref string result, ref double toGo, int step, string name)
+		private static void Append(ref string result, ref int toGo, int step, string name)
 		{
 			var val = toGo;
 
