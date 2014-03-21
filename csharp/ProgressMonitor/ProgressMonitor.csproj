@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleProgressMonitor.cs" />
     <Compile Include="FlatToHierarchicalProgressMonitor.cs" />
     <Compile Include="ProgressMonitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

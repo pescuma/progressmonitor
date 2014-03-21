@@ -7,6 +7,7 @@ namespace org.pescuma.progressmonitor
 {
 	public class FlatToHierarchicalProgressMonitor : ProgressMonitor
 	{
+		private readonly string prefix;
 		private readonly FlatProgressMonitor monitor;
 		private readonly FlatToHierarchicalProgressMonitor parent;
 
@@ -14,8 +15,9 @@ namespace org.pescuma.progressmonitor
 		private int currentStep;
 		private string currentStepName;
 
-		public FlatToHierarchicalProgressMonitor(FlatProgressMonitor monitor)
+		public FlatToHierarchicalProgressMonitor(string name, FlatProgressMonitor monitor)
 		{
+			this.prefix = name;
 			this.monitor = monitor;
 		}
 
@@ -130,6 +132,8 @@ namespace org.pescuma.progressmonitor
 			{
 				if (x.currentStepName != null)
 					names.Add(x.currentStepName);
+				if (x.prefix != null)
+					names.Add(x.prefix);
 
 				x = x.parent;
 			} while (x != null);
@@ -149,6 +153,21 @@ namespace org.pescuma.progressmonitor
 		{
 			if (steps == null)
 				throw new InvalidOperationException("Not started or already finished");
+		}
+
+		public void Report(params string[] message)
+		{
+			monitor.Report(message);
+		}
+
+		public void ReportWarning(params string[] message)
+		{
+			monitor.ReportWarning(message);
+		}
+
+		public void ReportError(params string[] message)
+		{
+			monitor.ReportError(message);
 		}
 
 		private class ActionDisposable : IDisposable
