@@ -154,6 +154,11 @@ namespace org.pescuma.progressmonitor
 			monitor.Report(message);
 		}
 
+		public void ReportDetail(params string[] message)
+		{
+			monitor.ReportDetail(message);
+		}
+
 		public void ReportWarning(params string[] message)
 		{
 			monitor.ReportWarning(message);

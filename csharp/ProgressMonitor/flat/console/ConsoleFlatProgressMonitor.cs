@@ -117,13 +117,12 @@ namespace org.pescuma.progressmonitor.flat.console
 
 		public void Report(params string[] message)
 		{
-			if (lastTickCount != null)
-				ClearLine();
+			ReportWithColor(message, null);
+		}
 
-			Console.WriteLine(Format(message));
-
-			if (lastTickCount != null)
-				OutputProgress();
+		public void ReportDetail(params string[] message)
+		{
+			ReportWithColor(message, ConsoleColor.DarkGray);
 		}
 
 		public void ReportWarning(params string[] message)
@@ -136,14 +135,25 @@ namespace org.pescuma.progressmonitor.flat.console
 			ReportWithColor(message, ConsoleColor.Red);
 		}
 
-		private void ReportWithColor(string[] message, ConsoleColor color)
+		private void ReportWithColor(string[] message, ConsoleColor? color)
 		{
-			var old = Console.ForegroundColor;
-			Console.ForegroundColor = color;
+			if (lastTickCount != null)
+				ClearLine();
 
-			Report(message);
+			var old = ConsoleColor.Gray;
+			if (color != null)
+			{
+				old = Console.ForegroundColor;
+				Console.ForegroundColor = color.Value;
+			}
 
-			Console.ForegroundColor = old;
+			Console.WriteLine(Format(message));
+
+			if (color != null)
+				Console.ForegroundColor = old;
+
+			if (lastTickCount != null)
+				OutputProgress();
 		}
 
 		private string Format(string[] message)
