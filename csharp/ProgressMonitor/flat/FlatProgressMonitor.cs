@@ -11,7 +11,10 @@
 		/// Sets the current process stage.
 		/// The process will be finished when current >= total.
 		/// </summary>
-		void SetCurrent(int current, int total, string stepName);
+		/// <param name="current"></param>
+		/// <param name="total"></param>
+		/// <param name="stepName">If multiple step names are be used, they have a parent-child relationship</param>
+		void SetCurrent(int current, int total, params string[] stepName);
 
 		/// <summary>
 		/// Reports an information to the user.

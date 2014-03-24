@@ -13,13 +13,13 @@ namespace org.pescuma.progressmonitor.flat.console.widget
 			get { return false; }
 		}
 
-		public int ComputeSize(int current, int total, double percent, string stepName)
+		public int ComputeSize(int current, int total, double percent, string[] stepName)
 		{
 			var text = Format(percent);
 			return text.Length;
 		}
 
-		public void Output(Action<string> writer, int width, int current, int total, double percent, string stepName)
+		public void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName)
 		{
 			var text = Format(percent);
 

@@ -9,20 +9,28 @@ namespace org.pescuma.progressmonitor.flat.console
 	{
 		private const int MIN_UPDATE_TIME_MS = 500;
 
-		private ConsoleWidget[] widgets = { new StepName(), new Percentage(), new Bar(), new ETA() };
+		private readonly ConsoleWidget[] widgets;
 
 		private int? lastTickCount;
 		private int lastCurrent;
 		private int lastTotal;
 		private double lastPercent;
-		private string lastStepName;
+		private string[] lastStepName;
+
+		public ConsoleFlatProgressMonitor(params ConsoleWidget[] widgets)
+		{
+			if (widgets == null || widgets.Length < 1)
+				this.widgets = new ConsoleWidget[] { new StepName(), new Percentage(), new Bar(), new ETA() };
+			else
+				this.widgets = widgets;
+		}
 
 		private int ConsoleWidth
 		{
 			get { return Console.BufferWidth - 1; }
 		}
 
-		public void SetCurrent(int current, int total, string stepName)
+		public void SetCurrent(int current, int total, params string[] stepName)
 		{
 			if (current < 0 || total < 0)
 				throw new ArgumentException();
@@ -36,7 +44,7 @@ namespace org.pescuma.progressmonitor.flat.console
 				output = true;
 			else if (lastTickCount == null)
 				output = true;
-			else if ((stepName ?? "") != (lastStepName ?? ""))
+			else if (AreEqual(stepName, lastStepName))
 				output = true;
 			else if (lastTickCount.Value + MIN_UPDATE_TIME_MS > tickCount)
 // ReSharper disable once RedundantAssignment
@@ -58,6 +66,21 @@ namespace org.pescuma.progressmonitor.flat.console
 
 			if (!finished)
 				OutputProgress();
+		}
+
+		private bool AreEqual(string[] a, string[] b)
+		{
+			if (a == null && b == null)
+				return true;
+			if (a == null || b == null)
+				return false;
+			if (a.Length != b.Length)
+				return false;
+			for (int i = 0; i < a.Length; i++)
+				if (!Equals(a[i], b[i]))
+					return false;
+
+			return true;
 		}
 
 		private void ClearLine()
@@ -82,7 +105,7 @@ namespace org.pescuma.progressmonitor.flat.console
 				var spacing = (widths.Any() ? 1 : 0);
 
 				if (remaining < width + spacing)
-					break;
+					continue;
 
 				remaining -= width + spacing;
 				widths[widget] = width;

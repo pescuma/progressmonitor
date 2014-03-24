@@ -17,7 +17,7 @@ namespace org.pescuma.progressmonitor.flat.console.widget
 			get { return false; }
 		}
 
-		public int ComputeSize(int current, int total, double percent, string stepName)
+		public int ComputeSize(int current, int total, double percent, string[] stepName)
 		{
 			if (percent < 0.5)
 				return 0;
@@ -27,7 +27,7 @@ namespace org.pescuma.progressmonitor.flat.console.widget
 			return eta.Length;
 		}
 
-		public void Output(Action<string> writer, int width, int current, int total, double percent, string stepName)
+		public void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName)
 		{
 			writer(eta);
 		}

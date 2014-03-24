@@ -15,9 +15,22 @@ namespace org.pescuma.progressmonitor
 		private int currentStep;
 		private string currentStepName;
 
+		private bool IsConfigured
+		{
+			get { return steps != null; }
+		}
+
+		private bool IsStarted
+		{
+			get { return currentStep >= 0; }
+		}
+
+		public event Action<string[]> OnStartedStep;
+		public event Action<string[]> OnFinishedStep;
+
 		public FlatToHierarchicalProgressMonitor(string name, FlatProgressMonitor monitor)
 		{
-			this.prefix = name;
+			prefix = name;
 			this.monitor = monitor;
 		}
 
@@ -59,27 +72,62 @@ namespace org.pescuma.progressmonitor
 			if (currentStep + 1 >= steps.Length)
 				throw new ArgumentException();
 
+			var wasStarted = IsStarted;
+			string[] oldName = null;
+			var onFinishedStep = OnFinishedStep;
+
+			if (wasStarted && onFinishedStep != null)
+				oldName = GetFullStepName();
+
 			currentStep = currentStep + 1;
 			currentStepName = stepName;
 
 			Propagate();
+
+			if (wasStarted && onFinishedStep != null)
+				onFinishedStep(oldName);
+
+			var onOnStartedStep = OnStartedStep;
+			if (onOnStartedStep != null)
+				onOnStartedStep(GetFullStepName());
 		}
 
 		public void Finished()
 		{
 			CheckConfigured();
 
+			var started = IsStarted;
+			string[] fullName = null;
+			var onFinishedStep = OnFinishedStep;
+
+			if (started && (onFinishedStep != null || parent == null))
+				fullName = GetFullStepName();
+
 			steps = null;
 
-			if (parent == null)
-				Output(1, "");
+			if (started)
+			{
+				if (parent == null)
+					Output(1, fullName);
+
+				if (onFinishedStep != null)
+					onFinishedStep(fullName);
+			}
 		}
 
 		public ProgressMonitor CreateSubMonitor()
 		{
 			CheckStarted();
 
-			return new FlatToHierarchicalProgressMonitor(this, monitor);
+			var result = new FlatToHierarchicalProgressMonitor(this, monitor);
+
+			if (OnStartedStep != null)
+				result.OnStartedStep += OnStartedStep;
+
+			if (OnFinishedStep != null)
+				result.OnFinishedStep += OnFinishedStep;
+
+			return result;
 		}
 
 		private void Propagate()
@@ -94,7 +142,7 @@ namespace org.pescuma.progressmonitor
 				parent.OnChildChange(percentage, name);
 		}
 
-		private void OnChildChange(double percentage, string name)
+		private void OnChildChange(double percentage, string[] name)
 		{
 			percentage = (steps.Take(currentStep)
 				.Sum() + steps[currentStep] * percentage) / steps.Sum();
@@ -105,19 +153,19 @@ namespace org.pescuma.progressmonitor
 				parent.OnChildChange(percentage, name);
 		}
 
-		private void Output(double percentage, string name)
+		private void Output(double percentage, string[] name)
 		{
 			monitor.SetCurrent((int) Math.Round(percentage * 1000), 1000, name);
 		}
 
-		private string GetFullStepName()
+		private string[] GetFullStepName()
 		{
 			var names = new List<string>();
 			var x = this;
 			do
 			{
-				if (x.currentStepName != null)
-					names.Add(x.currentStepName);
+				names.Add(x.currentStepName ?? "");
+
 				if (x.prefix != null)
 					names.Add(x.prefix);
 
@@ -126,7 +174,7 @@ namespace org.pescuma.progressmonitor
 
 			names.Reverse();
 
-			return string.Join(" - ", names);
+			return names.ToArray();
 		}
 
 		private void CheckNotConfigured()
@@ -137,7 +185,7 @@ namespace org.pescuma.progressmonitor
 
 		private void CheckConfigured()
 		{
-			if (steps == null)
+			if (!IsConfigured)
 				throw new InvalidOperationException("Not configured yet or already finished");
 		}
 
@@ -145,7 +193,7 @@ namespace org.pescuma.progressmonitor
 		{
 			CheckConfigured();
 
-			if (currentStep < 0)
+			if (!IsStarted)
 				throw new InvalidOperationException("Not started yet");
 		}
 

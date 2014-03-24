@@ -1,7 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
 using org.pescuma.progressmonitor.flat;
-using org.pescuma.progressmonitor.simple;
 
 namespace org.pescuma.progressmonitor
 {
@@ -10,6 +9,8 @@ namespace org.pescuma.progressmonitor
 	{
 		private Mock<FlatProgressMonitor> flat;
 		private FlatToHierarchicalProgressMonitor progress;
+		private int onStartedCalls;
+		private int onFinishedCalls;
 
 		[SetUp]
 		public void SetUp()
@@ -17,6 +18,12 @@ namespace org.pescuma.progressmonitor
 			flat = new Mock<FlatProgressMonitor>();
 
 			progress = new FlatToHierarchicalProgressMonitor(null, flat.Object);
+
+			onStartedCalls = 0;
+			progress.OnStartedStep += n => onStartedCalls++;
+
+			onFinishedCalls = 0;
+			progress.OnFinishedStep += n => onFinishedCalls++;
 		}
 
 		[Test]
@@ -24,7 +31,7 @@ namespace org.pescuma.progressmonitor
 		{
 			progress.ConfigureSteps(1);
 
-			flat.Verify(f => f.SetCurrent(0, 1000, ""), Times.Never);
+			flat.Verify(f => f.SetCurrent(0, 1000, null), Times.Never);
 		}
 
 		[Test]
@@ -42,7 +49,7 @@ namespace org.pescuma.progressmonitor
 			progress.ConfigureSteps(1);
 			progress.Finished();
 
-			flat.Verify(f => f.SetCurrent(1000, 1000, ""));
+			flat.Verify(f => f.SetCurrent(1000, 1000, ""), Times.Never);
 		}
 
 		[Test]
@@ -122,7 +129,7 @@ namespace org.pescuma.progressmonitor
 			sub.StartStep();
 			sub.StartStep();
 
-			flat.Verify(f => f.SetCurrent(250, 1000, ""));
+			flat.Verify(f => f.SetCurrent(250, 1000, "", ""));
 		}
 
 		[Test]
@@ -135,7 +142,75 @@ namespace org.pescuma.progressmonitor
 			sub.ConfigureSteps(2);
 			sub.StartStep("B");
 
-			flat.Verify(f => f.SetCurrent(0, 1000, "A - B"));
+			flat.Verify(f => f.SetCurrent(0, 1000, "A", "B"));
+		}
+
+		[Test]
+		public void TestOnStarted_NotCalledOnConfigure()
+		{
+			progress.ConfigureSteps(2);
+
+			Assert.AreEqual(0, onStartedCalls);
+		}
+
+		[Test]
+		public void TestOnStarted_CalledOnFirstStart()
+		{
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+
+			Assert.AreEqual(1, onStartedCalls);
+		}
+
+		[Test]
+		public void TestOnStarted_CalledOnMultipleStart()
+		{
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+			progress.StartStep();
+
+			Assert.AreEqual(2, onStartedCalls);
+		}
+
+		[Test]
+		public void TestOnStarted_NotCalledOnFinish()
+		{
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+			progress.StartStep();
+			progress.Finished();
+
+			Assert.AreEqual(2, onStartedCalls);
+		}
+
+		[Test]
+		public void TestOnFinished_NotCalledOnStart()
+		{
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+
+			Assert.AreEqual(0, onFinishedCalls);
+		}
+
+		[Test]
+		public void TestOnFinished_CalledOnMulitpleStarts()
+		{
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+			progress.StartStep();
+
+			Assert.AreEqual(1, onFinishedCalls);
+		}
+
+		[Test]
+		public void TestOnFinished_CalledOnFinish()
+		{
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+			progress.StartStep();
+			progress.Finished();
+
+			Assert.AreEqual(2, onFinishedCalls);
 		}
 	}
 }
