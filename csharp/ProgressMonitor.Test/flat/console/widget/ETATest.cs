@@ -1,8 +1,8 @@
 ﻿using System;
 using NUnit.Framework;
-using org.pescuma.progressmonitor.flat.console.widget;
+using org.pescuma.progressmonitor.console.widget;
 
-namespace org.pescuma.progressmonitor.simple.console.widget
+namespace org.pescuma.progressmonitor.flat.console.widget
 {
 	[TestFixture]
 	public class ETATest

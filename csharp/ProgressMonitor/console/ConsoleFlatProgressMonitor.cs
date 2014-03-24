@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using org.pescuma.progressmonitor.flat.console.widget;
+using org.pescuma.progressmonitor.console.widget;
+using org.pescuma.progressmonitor.utils;
 
-namespace org.pescuma.progressmonitor.flat.console
+namespace org.pescuma.progressmonitor.console
 {
 	public class ConsoleFlatProgressMonitor : FlatProgressMonitor
 	{
@@ -44,7 +45,7 @@ namespace org.pescuma.progressmonitor.flat.console
 				output = true;
 			else if (lastTickCount == null)
 				output = true;
-			else if (AreEqual(stepName, lastStepName))
+			else if (!AreEqual(stepName, lastStepName))
 				output = true;
 			else if (lastTickCount.Value + MIN_UPDATE_TIME_MS > tickCount)
 // ReSharper disable once RedundantAssignment
@@ -163,32 +164,10 @@ namespace org.pescuma.progressmonitor.flat.console
 			if (lastTickCount != null)
 				ClearLine();
 
-			var old = ConsoleColor.Gray;
-			if (color != null)
-			{
-				old = Console.ForegroundColor;
-				Console.ForegroundColor = color.Value;
-			}
-
-			Console.WriteLine(Format(message));
-
-			if (color != null)
-				Console.ForegroundColor = old;
+			Utils.ConsoleWriteLine(Utils.Format(message), color);
 
 			if (lastTickCount != null)
 				OutputProgress();
-		}
-
-		private string Format(string[] message)
-		{
-			if (message.Length < 1)
-				return "";
-			else if (message.Length == 1)
-				return message[0];
-			else
-// ReSharper disable once RedundantCast
-				return string.Format(message[0], (string[]) message.Skip(1)
-					.ToArray());
 		}
 	}
 }

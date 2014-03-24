@@ -1,7 +1,7 @@
-﻿using org.pescuma.progressmonitor.flat.console;
-using org.pescuma.progressmonitor.flat.console.widget;
+﻿using org.pescuma.progressmonitor.console.widget;
+using org.pescuma.progressmonitor.utils;
 
-namespace org.pescuma.progressmonitor
+namespace org.pescuma.progressmonitor.console
 {
 	public class ConsoleProgressMonitor : FlatToHierarchicalProgressMonitor
 	{

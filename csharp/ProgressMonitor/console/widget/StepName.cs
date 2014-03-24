@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace org.pescuma.progressmonitor.flat.console.widget
+namespace org.pescuma.progressmonitor.console.widget
 {
 	public class StepName : ConsoleWidget
 	{

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace org.pescuma.progressmonitor.flat.console.widget
+namespace org.pescuma.progressmonitor.console.widget
 {
 	public interface ConsoleWidget
 	{
