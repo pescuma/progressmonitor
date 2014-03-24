@@ -5,8 +5,8 @@ namespace org.pescuma.progressmonitor.console
 {
 	public class ConsoleProgressMonitor : FlatToHierarchicalProgressMonitor
 	{
-		public ConsoleProgressMonitor(string name, params ConsoleWidget[] widgets)
-			: base(name, new ConsoleFlatProgressMonitor(widgets))
+		public ConsoleProgressMonitor(string prefix, params ConsoleWidget[] widgets)
+			: base(prefix, new ConsoleFlatProgressMonitor(widgets))
 		{
 		}
 

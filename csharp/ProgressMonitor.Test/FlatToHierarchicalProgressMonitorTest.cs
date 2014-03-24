@@ -75,10 +75,10 @@ namespace org.pescuma.progressmonitor
 		}
 
 		[Test]
-		public void TestFinished_NotStarted()
+		public void TestDispose_NotStarted()
 		{
 			var steps = progress.ConfigureSteps(1);
-			steps.Finished();
+			steps.Dispose();
 
 			flat.Verify(f => f.SetCurrent(1000, 1000, ""), Times.Never);
 		}
@@ -90,7 +90,7 @@ namespace org.pescuma.progressmonitor
 			steps.StartStep();
 			steps.Finished();
 
-			flat.Verify(f => f.SetCurrent(1000, 1000, ""));
+			flat.Verify(f => f.SetCurrent(1000, 1000));
 		}
 
 		[Test]
@@ -100,7 +100,7 @@ namespace org.pescuma.progressmonitor
 			steps.StartStep();
 			steps.Finished();
 
-			flat.Verify(f => f.SetCurrent(1000, 1000, ""));
+			flat.Verify(f => f.SetCurrent(1000, 1000));
 		}
 
 		[Test]
@@ -126,15 +126,17 @@ namespace org.pescuma.progressmonitor
 		}
 
 		[Test]
-		public void TestSubStep_FinishDoesntPropagate()
+		public void TestSubStep_DisposeDoesntPropagate()
 		{
 			var steps = progress.ConfigureSteps(2);
 			steps.StartStep();
 
 			var sub = steps.CreateSubMonitor()
 				.ConfigureSteps(2);
+			sub.StartStep();
 			sub.Finished();
 
+			flat.Verify(f => f.SetCurrent(500, 1000, "", ""), Times.Never);
 			flat.Verify(f => f.SetCurrent(500, 1000, ""), Times.Never);
 		}
 

@@ -6,17 +6,12 @@ using org.pescuma.progressmonitor.utils;
 
 namespace org.pescuma.progressmonitor.console
 {
-	public class ConsoleFlatProgressMonitor : FlatProgressMonitor
+	public class ConsoleFlatProgressMonitor : BaseConsoleProgressMonitor
 	{
-		private const int MIN_UPDATE_TIME_MS = 500;
-
 		private readonly ConsoleWidget[] widgets;
-
-		private int? lastTickCount;
+		private bool showingProgress;
 		private int lastCurrent;
 		private int lastTotal;
-		private double lastPercent;
-		private string[] lastStepName;
 
 		public ConsoleFlatProgressMonitor(params ConsoleWidget[] widgets)
 		{
@@ -31,57 +26,16 @@ namespace org.pescuma.progressmonitor.console
 			get { return Console.BufferWidth - 1; }
 		}
 
-		public void SetCurrent(int current, int total, params string[] stepName)
+		protected override void WriteToConsole(int current, int total, string[] stepName)
 		{
-			if (current < 0 || total < 0)
-				throw new ArgumentException();
-
-			var finished = (current >= total);
-			var tickCount = Environment.TickCount;
-			var percent = current / (double) total;
-
-			var output = false;
-			if (finished)
-				output = true;
-			else if (lastTickCount == null)
-				output = true;
-			else if (!AreEqual(stepName, lastStepName))
-				output = true;
-			else if (lastTickCount.Value + MIN_UPDATE_TIME_MS > tickCount)
-// ReSharper disable once RedundantAssignment
-				output = false;
-			else if (percent > lastPercent)
-				output = true;
-
-			if (!output)
-				return;
-
-			lastTickCount = (finished ? (int?) null : tickCount);
+			if (showingProgress)
+				ClearLine();
 
 			lastCurrent = current;
 			lastTotal = total;
-			lastStepName = stepName;
-			lastPercent = percent;
 
-			ClearLine();
-
-			if (!finished)
+			if (!HasFinished)
 				OutputProgress();
-		}
-
-		private bool AreEqual(string[] a, string[] b)
-		{
-			if (a == null && b == null)
-				return true;
-			if (a == null || b == null)
-				return false;
-			if (a.Length != b.Length)
-				return false;
-			for (int i = 0; i < a.Length; i++)
-				if (!Equals(a[i], b[i]))
-					return false;
-
-			return true;
 		}
 
 		private void ClearLine()
@@ -89,6 +43,8 @@ namespace org.pescuma.progressmonitor.console
 			Console.Write("\r");
 			Console.Write(new String(' ', ConsoleWidth));
 			Console.Write("\r");
+
+			showingProgress = false;
 		}
 
 		private void OutputProgress()
@@ -99,7 +55,7 @@ namespace org.pescuma.progressmonitor.console
 
 			foreach (var widget in widgets)
 			{
-				var width = widget.ComputeSize(lastCurrent, lastTotal, lastPercent, lastStepName);
+				var width = widget.ComputeSize(lastCurrent, lastTotal, LastPercent, LastStepName);
 				if (width < 1)
 					continue;
 
@@ -135,38 +91,22 @@ namespace org.pescuma.progressmonitor.console
 					Console.Write(" ");
 
 				var w = used[i];
-				w.Output(Console.Write, widths[w], lastCurrent, lastTotal, lastPercent, lastStepName);
+				w.Output(Console.Write, widths[w], lastCurrent, lastTotal, LastPercent, LastStepName);
 			}
+
+			showingProgress = true;
 		}
 
-		public void Report(params string[] message)
+		protected override void ReportWithColor(string[] message, ConsoleColor? color)
 		{
-			ReportWithColor(message, null);
-		}
+			var wasShowingProgress = showingProgress;
 
-		public void ReportDetail(params string[] message)
-		{
-			ReportWithColor(message, ConsoleColor.DarkGray);
-		}
-
-		public void ReportWarning(params string[] message)
-		{
-			ReportWithColor(message, ConsoleColor.DarkYellow);
-		}
-
-		public void ReportError(params string[] message)
-		{
-			ReportWithColor(message, ConsoleColor.Red);
-		}
-
-		private void ReportWithColor(string[] message, ConsoleColor? color)
-		{
-			if (lastTickCount != null)
+			if (wasShowingProgress)
 				ClearLine();
 
 			Utils.ConsoleWriteLine(Utils.Format(message), color);
 
-			if (lastTickCount != null)
+			if (wasShowingProgress)
 				OutputProgress();
 		}
 	}

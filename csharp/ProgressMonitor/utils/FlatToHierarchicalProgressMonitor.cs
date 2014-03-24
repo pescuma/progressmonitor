@@ -5,52 +5,52 @@ namespace org.pescuma.progressmonitor.utils
 {
 	public class FlatToHierarchicalProgressMonitor : ProgressMonitor
 	{
-		private readonly string[] name;
 		private readonly FlatProgressMonitor flat;
+		private readonly string[] name;
 		private readonly Steps parent;
 		private bool configured;
 
 		public event Action<string[]> OnStartedStep;
 		public event Action<string[]> OnFinishedStep;
 
-		public FlatToHierarchicalProgressMonitor(string name, FlatProgressMonitor flat)
+		public FlatToHierarchicalProgressMonitor(FlatProgressMonitor flat)
+			: this(null, flat)
+		{
+		}
+
+		public FlatToHierarchicalProgressMonitor(string prefix, FlatProgressMonitor flat)
 		{
 			this.flat = flat;
 
-			if (!string.IsNullOrEmpty(name))
-				this.name = new[] { name };
+			if (!string.IsNullOrEmpty(prefix))
+				name = new[] { prefix };
 			else
-				this.name = new string[0];
+				name = new string[0];
 		}
 
 		private FlatToHierarchicalProgressMonitor(Steps parent, FlatProgressMonitor flat, string[] name)
 		{
+			this.flat = flat;
 			this.name = name;
 			this.parent = parent;
-			this.flat = flat;
 		}
 
-		public ProgressSteps ConfigureSteps(params int[] aSteps)
+		public ProgressSteps ConfigureSteps(params int[] steps)
 		{
 			if (configured)
 				throw new InvalidOperationException("Alteady configured");
 			configured = true;
 
-			if (aSteps.Length < 1)
+			if (steps.Length < 1)
 				throw new ArgumentException();
-			if (aSteps.Any(v => v < 1))
+			if (steps.Any(v => v < 1))
 				throw new ArgumentException();
 
-			int[] steps;
-			if (aSteps.Length == 1)
+			if (steps.Length == 1)
 			{
-				steps = new int[aSteps[0]];
+				steps = new int[steps[0]];
 				for (var i = 0; i < steps.Length; i++)
 					steps[i] = 1;
-			}
-			else
-			{
-				steps = aSteps;
 			}
 
 			return new Steps(this, steps);
@@ -97,9 +97,14 @@ namespace org.pescuma.progressmonitor.utils
 				this.steps = steps;
 			}
 
-			private bool IsStarted
+			private bool HasStarted
 			{
 				get { return currentStep >= 0; }
+			}
+
+			private bool HasFinished
+			{
+				get { return currentStep >= steps.Length; }
 			}
 
 			private string[] GetFullStepName()
@@ -121,13 +126,14 @@ namespace org.pescuma.progressmonitor.utils
 				if (currentStep + 1 >= steps.Length)
 					throw new InvalidOperationException("All configured steps were already used");
 
-				var wasStarted = IsStarted;
-				string[] oldName = null;
-				var onFinishedStep = GetRoot()
-					.OnFinishedStep;
+				var root = GetRoot();
 
-				if (wasStarted && onFinishedStep != null)
-					oldName = GetFullStepName();
+				if (HasStarted)
+				{
+					var onFinishedStep = root.OnFinishedStep;
+					if (onFinishedStep != null)
+						onFinishedStep(GetFullStepName());
+				}
 
 				currentStep = currentStep + 1;
 				currentStepName = stepName ?? "";
@@ -136,32 +142,37 @@ namespace org.pescuma.progressmonitor.utils
 
 				OnChildChange(0, 1, newName);
 
-				if (wasStarted && onFinishedStep != null)
-					onFinishedStep(oldName);
-
-				var onOnStartedStep = GetRoot()
-					.OnStartedStep;
+				var onOnStartedStep = root.OnStartedStep;
 				if (onOnStartedStep != null)
 					onOnStartedStep(newName);
 			}
 
 			public void Finished()
 			{
-				if (!IsStarted)
-					return;
+				CheckRunning();
 
-				currentStep = steps.Length - 1;
-
-				var fullName = GetFullStepName();
 				var onFinishedStep = GetRoot()
 					.OnFinishedStep;
+				if (onFinishedStep != null)
+					onFinishedStep(GetFullStepName());
 
-				OnChildChange(1, 1, fullName);
+				// The only usefull if the root one, in the other cases the parent 
+				// will finish it on the next call to StartStep
+				if (monitor.parent == null)
+				{
+					// We are really finishing the last step
+					currentStep = steps.Length - 1;
+
+					OnChildChange(1, 1, monitor.name);
+				}
 
 				currentStep = steps.Length;
+			}
 
-				if (onFinishedStep != null)
-					onFinishedStep(fullName);
+			public void Dispose()
+			{
+				if (HasStarted && !HasFinished)
+					Finished();
 			}
 
 			internal void OnChildChange(int current, int total, string[] stepName)
@@ -174,17 +185,19 @@ namespace org.pescuma.progressmonitor.utils
 				monitor.SetCurrent((int) Math.Round(percentage * 1000), 1000, stepName);
 			}
 
-			public void Dispose()
-			{
-				Finished();
-			}
-
 			public ProgressMonitor CreateSubMonitor()
 			{
-				if (!IsStarted)
-					throw new InvalidOperationException("Not started yet");
+				CheckRunning();
 
 				return new FlatToHierarchicalProgressMonitor(this, monitor, GetFullStepName());
+			}
+
+			private void CheckRunning()
+			{
+				if (!HasStarted)
+					throw new InvalidOperationException("Not started yet");
+				if (HasFinished)
+					throw new InvalidOperationException("Already finished");
 			}
 
 			public void Report(params string[] message)

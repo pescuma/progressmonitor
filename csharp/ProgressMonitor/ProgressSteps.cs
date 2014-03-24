@@ -16,7 +16,7 @@ namespace org.pescuma.progressmonitor
 		ProgressMonitor CreateSubMonitor();
 
 		/// <summary>
-		/// The same as calling Dispose()
+		/// Called automatically by Dispose()
 		/// </summary>
 		void Finished();
 	}
