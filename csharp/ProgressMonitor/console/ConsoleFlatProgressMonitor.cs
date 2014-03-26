@@ -6,7 +6,7 @@ using org.pescuma.progressmonitor.utils;
 
 namespace org.pescuma.progressmonitor.console
 {
-	public class ConsoleFlatProgressMonitor : BaseConsoleProgressMonitor
+	public class ConsoleFlatProgressMonitor : BaseConsoleFlatProgressMonitor
 	{
 		private readonly ConsoleWidget[] widgets;
 		private bool showingProgress;

@@ -20,10 +20,10 @@ namespace org.pescuma.progressmonitor
 			progress = new FlatToHierarchicalProgressMonitor(null, flat.Object);
 
 			onStartedCalls = 0;
-			progress.OnStartedStep += n => onStartedCalls++;
+			progress.AfterStartedStep += n => onStartedCalls++;
 
 			onFinishedCalls = 0;
-			progress.OnFinishedStep += n => onFinishedCalls++;
+			progress.BeforeFinishedStep += n => onFinishedCalls++;
 		}
 
 		[Test]

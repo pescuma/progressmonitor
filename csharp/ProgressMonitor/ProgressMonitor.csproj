@@ -40,8 +40,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="console\BaseConsoleProgressMonitor.cs" />
+    <Compile Include="console\BaseConsoleFlatProgressMonitor.cs" />
+    <Compile Include="console\MachineReadableConsoleProgressMonitor.cs" />
     <Compile Include="console\ConsoleProgressMonitor.cs" />
+    <Compile Include="utils\FilteredFlatProgressMonitor.cs" />
     <Compile Include="utils\FlatToHierarchicalProgressMonitor.cs" />
     <Compile Include="console\MachineReadableConsole.cs" />
     <Compile Include="console\MachineReadableConsoleFlatProgressMonitor.cs" />

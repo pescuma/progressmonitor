@@ -3,7 +3,7 @@ using org.pescuma.progressmonitor.utils;
 
 namespace org.pescuma.progressmonitor.console
 {
-	public abstract class BaseConsoleProgressMonitor : FlatProgressMonitor
+	public abstract class BaseConsoleFlatProgressMonitor : FlatProgressMonitor
 	{
 		private const int MIN_UPDATE_TIME_MS = 500;
 

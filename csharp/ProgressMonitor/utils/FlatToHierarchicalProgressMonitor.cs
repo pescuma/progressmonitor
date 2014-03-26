@@ -5,13 +5,43 @@ namespace org.pescuma.progressmonitor.utils
 {
 	public class FlatToHierarchicalProgressMonitor : ProgressMonitor
 	{
-		private readonly FlatProgressMonitor flat;
+		private readonly FilteredFlatProgressMonitor flat;
 		private readonly string[] name;
 		private readonly Steps parent;
 		private bool configured;
 
-		public event Action<string[]> OnStartedStep;
-		public event Action<string[]> OnFinishedStep;
+		public event Action<string[]> AfterStartedStep;
+		public event Action<string[]> BeforeFinishedStep;
+
+		public bool DontOutputProgress
+		{
+			get { return flat.DontOutputProgress; }
+			set { flat.DontOutputProgress = value; }
+		}
+
+		public bool DontOutputReports
+		{
+			get { return flat.DontOutputReports; }
+			set { flat.DontOutputReports = value; }
+		}
+
+		public bool DontOutputReportDetails
+		{
+			get { return flat.DontOutputReportDetails; }
+			set { flat.DontOutputReportDetails = value; }
+		}
+
+		public bool DontOutputReportWarnings
+		{
+			get { return flat.DontOutputReportWarnings; }
+			set { flat.DontOutputReportWarnings = value; }
+		}
+
+		public bool DontOutputReportErrors
+		{
+			get { return flat.DontOutputReportErrors; }
+			set { flat.DontOutputReportErrors = value; }
+		}
 
 		public FlatToHierarchicalProgressMonitor(FlatProgressMonitor flat)
 			: this(null, flat)
@@ -20,7 +50,7 @@ namespace org.pescuma.progressmonitor.utils
 
 		public FlatToHierarchicalProgressMonitor(string prefix, FlatProgressMonitor flat)
 		{
-			this.flat = flat;
+			this.flat = new FilteredFlatProgressMonitor(flat);
 
 			if (!string.IsNullOrEmpty(prefix))
 				name = new[] { prefix };
@@ -28,7 +58,7 @@ namespace org.pescuma.progressmonitor.utils
 				name = new string[0];
 		}
 
-		private FlatToHierarchicalProgressMonitor(Steps parent, FlatProgressMonitor flat, string[] name)
+		private FlatToHierarchicalProgressMonitor(Steps parent, FilteredFlatProgressMonitor flat, string[] name)
 		{
 			this.flat = flat;
 			this.name = name;
@@ -130,7 +160,7 @@ namespace org.pescuma.progressmonitor.utils
 
 				if (HasStarted)
 				{
-					var onFinishedStep = root.OnFinishedStep;
+					var onFinishedStep = root.BeforeFinishedStep;
 					if (onFinishedStep != null)
 						onFinishedStep(GetFullStepName());
 				}
@@ -142,7 +172,7 @@ namespace org.pescuma.progressmonitor.utils
 
 				OnChildChange(0, 1, newName);
 
-				var onOnStartedStep = root.OnStartedStep;
+				var onOnStartedStep = root.AfterStartedStep;
 				if (onOnStartedStep != null)
 					onOnStartedStep(newName);
 			}
@@ -152,7 +182,7 @@ namespace org.pescuma.progressmonitor.utils
 				CheckRunning();
 
 				var onFinishedStep = GetRoot()
-					.OnFinishedStep;
+					.BeforeFinishedStep;
 				if (onFinishedStep != null)
 					onFinishedStep(GetFullStepName());
 
@@ -189,7 +219,7 @@ namespace org.pescuma.progressmonitor.utils
 			{
 				CheckRunning();
 
-				return new FlatToHierarchicalProgressMonitor(this, monitor, GetFullStepName());
+				return new FlatToHierarchicalProgressMonitor(this, monitor.flat, GetFullStepName());
 			}
 
 			private void CheckRunning()
