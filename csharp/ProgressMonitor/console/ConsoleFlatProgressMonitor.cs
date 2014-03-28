@@ -26,6 +26,12 @@ namespace org.pescuma.progressmonitor.console
 			get { return Console.BufferWidth - 1; }
 		}
 
+		protected override void OnStart()
+		{
+			foreach (var widget in widgets)
+				widget.Started();
+		}
+
 		protected override void WriteToConsole(int current, int total, string[] stepName)
 		{
 			if (showingProgress)

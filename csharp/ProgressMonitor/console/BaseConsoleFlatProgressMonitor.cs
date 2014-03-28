@@ -40,12 +40,19 @@ namespace org.pescuma.progressmonitor.console
 			if (!output)
 				return;
 
+			if (lastTickCount == null)
+				OnStart();
+
 			lastTickCount = (finished ? (int?) null : tickCount);
 			LastStepName = stepName;
 			LastPercent = percent;
 			HasFinished = finished;
 
 			WriteToConsole(current, total, stepName);
+		}
+
+		protected virtual void OnStart()
+		{
 		}
 
 		protected abstract void WriteToConsole(int current, int total, string[] stepName);

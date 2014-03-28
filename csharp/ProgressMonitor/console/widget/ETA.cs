@@ -19,7 +19,7 @@ namespace org.pescuma.progressmonitor.console.widget
 
 		public int ComputeSize(int current, int total, double percent, string[] stepName)
 		{
-			if (percent < 0.5)
+			if (percent < 0.01)
 				return 0;
 
 			eta = ComputeETA(DateTime.Now - start, percent);
