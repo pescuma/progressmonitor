@@ -16,7 +16,16 @@ namespace org.pescuma.progressmonitor.console
 		public ConsoleFlatProgressMonitor(params ConsoleWidget[] widgets)
 		{
 			if (widgets == null || widgets.Length < 1)
-				this.widgets = new ConsoleWidget[] { new StepName(), new Percentage(), new Bar(), new ETA() };
+				this.widgets = new ConsoleWidget[]
+				{
+					new StepNameWidget(),
+					new PercentageWidget(),
+					new BarWidget(),
+					"Elapsed",
+					new ElapsedWidget(),
+					"| ETA",
+					new ETAWidget()
+				};
 			else
 				this.widgets = widgets;
 		}

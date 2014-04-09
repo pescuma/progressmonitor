@@ -43,6 +43,8 @@
     <Compile Include="console\BaseConsoleFlatProgressMonitor.cs" />
     <Compile Include="console\MachineReadableConsoleProgressMonitor.cs" />
     <Compile Include="console\ConsoleProgressMonitor.cs" />
+    <Compile Include="console\widget\ElapsedWidget.cs" />
+    <Compile Include="console\widget\TextWidget.cs" />
     <Compile Include="utils\FilteredFlatProgressMonitor.cs" />
     <Compile Include="utils\FlatToHierarchicalProgressMonitor.cs" />
     <Compile Include="console\MachineReadableConsole.cs" />
@@ -51,12 +53,12 @@
     <Compile Include="ProgressSteps.cs" />
     <Compile Include="ProgressMonitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="console\widget\Bar.cs" />
+    <Compile Include="console\widget\BarWidget.cs" />
     <Compile Include="console\ConsoleFlatProgressMonitor.cs" />
     <Compile Include="console\widget\ConsoleWidget.cs" />
-    <Compile Include="console\widget\ETA.cs" />
-    <Compile Include="console\widget\Percentage.cs" />
-    <Compile Include="console\widget\StepName.cs" />
+    <Compile Include="console\widget\ETAWidget.cs" />
+    <Compile Include="console\widget\PercentageWidget.cs" />
+    <Compile Include="console\widget\StepNameWidget.cs" />
     <Compile Include="FlatProgressMonitor.cs" />
     <Compile Include="utils\Utils.cs" />
   </ItemGroup>

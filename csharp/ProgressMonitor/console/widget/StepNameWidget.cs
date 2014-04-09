@@ -3,48 +3,48 @@ using System.Linq;
 
 namespace org.pescuma.progressmonitor.console.widget
 {
-	public class StepName : ConsoleWidget
+	public class StepNameWidget : ConsoleWidget
 	{
 		private readonly Func<string[], string> formater = DefaultFormater;
 		private readonly int maxWidth = 30;
 
-		public StepName(Func<string[], string> formater, int maxWidth)
+		public StepNameWidget(Func<string[], string> formater, int maxWidth)
 		{
 			this.formater = formater;
 			this.maxWidth = maxWidth;
 		}
 
-		public StepName(Func<string[], string> formater)
+		public StepNameWidget(Func<string[], string> formater)
 		{
 			this.formater = formater;
 			maxWidth = int.MaxValue;
 		}
 
-		public StepName(int maxWidth)
+		public StepNameWidget(int maxWidth)
 		{
 			this.maxWidth = maxWidth;
 		}
 
-		public StepName()
+		public StepNameWidget()
 		{
 		}
 
-		public void Started()
+		public override void Started()
 		{
 		}
 
-		public bool Grow
+		public override bool Grow
 		{
 			get { return false; }
 		}
 
-		public int ComputeSize(int current, int total, double percent, string[] stepName)
+		public override int ComputeSize(int current, int total, double percent, string[] stepName)
 		{
 			var text = formater(stepName) ?? "";
 			return Math.Min(text.Length, maxWidth);
 		}
 
-		public void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName)
+		public override void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName)
 		{
 			var text = formater(stepName) ?? "";
 

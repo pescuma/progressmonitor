@@ -2,23 +2,23 @@
 
 namespace org.pescuma.progressmonitor.console.widget
 {
-	public class Bar : ConsoleWidget
+	public class BarWidget : ConsoleWidget
 	{
-		public void Started()
+		public override void Started()
 		{
 		}
 
-		public bool Grow
+		public override bool Grow
 		{
 			get { return true; }
 		}
 
-		public int ComputeSize(int current, int total, double percent, string[] stepName)
+		public override int ComputeSize(int current, int total, double percent, string[] stepName)
 		{
 			return 5;
 		}
 
-		public void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName)
+		public override void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName)
 		{
 			writer("[");
 

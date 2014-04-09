@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 
 namespace org.pescuma.progressmonitor.utils
 {
@@ -44,6 +45,45 @@ namespace org.pescuma.progressmonitor.utils
 				if (!Equals(a[i], b[i]))
 					return false;
 			return true;
+		}
+
+		public static string FormatSeconds(int seconds)
+		{
+			if (seconds < 1)
+				return "0s";
+
+			var result = new StringBuilder();
+			Append(result, ref seconds, 60, "s");
+			Append(result, ref seconds, 60, "m");
+			Append(result, ref seconds, 24, "h");
+			Append(result, ref seconds, 0, "d");
+			return result.ToString();
+		}
+
+		private static void Append(StringBuilder result, ref int toGo, int step, string name)
+		{
+			if (toGo < 1)
+				return;
+
+			var val = toGo;
+
+			if (step > 0)
+			{
+				val = toGo % step;
+				toGo /= step;
+			}
+			else
+			{
+				toGo = 0;
+			}
+
+			if (result.Length > 0)
+				result.Insert(0, " ");
+
+			if (toGo > 0)
+				result.Insert(0, string.Format("{0,2}{1}", val, name));
+			else
+				result.Insert(0, string.Format("{0}{1}", val, name));
 		}
 	}
 }

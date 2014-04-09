@@ -2,14 +2,21 @@
 
 namespace org.pescuma.progressmonitor.console.widget
 {
-	public interface ConsoleWidget
+	public abstract class ConsoleWidget
 	{
-		void Started();
+		public abstract void Started();
 
-		bool Grow { get; }
+		public abstract bool Grow { get; }
 
-		int ComputeSize(int current, int total, double percent, string[] stepName);
+		public abstract int ComputeSize(int current, int total, double percent, string[] stepName);
 
-		void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName);
+		public abstract void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName);
+
+		// Implicit conversions
+
+		public static implicit operator ConsoleWidget(string text)
+		{
+			return new TextWidget(text);
+		}
 	}
 }

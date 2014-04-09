@@ -212,7 +212,12 @@ namespace org.pescuma.progressmonitor.utils
 				var percentage = (steps.Take(currentStep)
 					.Sum() + steps[currentStep] * parentPercentage) / steps.Sum();
 
-				monitor.SetCurrent((int) Math.Round(percentage * 1000), 1000, stepName);
+				// If not finished, pass on as not finished (to avoid problems in the flat monitor)
+				var parentCurrent = (int) Math.Round(percentage * 1000);
+				if (current < total)
+					parentCurrent = Math.Min(999, parentCurrent);
+
+				monitor.SetCurrent(parentCurrent, 1000, stepName);
 			}
 
 			public ProgressMonitor CreateSubMonitor()
