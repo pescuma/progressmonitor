@@ -1,6 +1,5 @@
 ﻿using System;
 using NUnit.Framework;
-using org.pescuma.progressmonitor.console.widget;
 using org.pescuma.progressmonitor.utils;
 
 namespace org.pescuma.progressmonitor.flat.console.widget

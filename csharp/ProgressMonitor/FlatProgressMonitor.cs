@@ -1,7 +1,7 @@
 ﻿namespace org.pescuma.progressmonitor
 {
 	/// <summary>
-	/// A simple progress monitor, that doesn't allow sub-steps.
+	/// A simple progress monitor that doesn't allow sub-steps.
 	/// 
 	/// Usually used internally by progress monitors.
 	/// </summary>

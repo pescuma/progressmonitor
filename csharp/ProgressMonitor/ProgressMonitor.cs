@@ -3,14 +3,30 @@ using System.Collections.Generic;
 
 namespace org.pescuma.progressmonitor
 {
-	public interface ProgressMonitor : FlatProgressMonitor
+	public interface ProgressMonitor : ProgressReporter
 	{
 		/// <summary>
 		/// Configure the number of steps. Must be called before StartStep
 		/// </summary>
 		/// <param name="steps">If one element: the number of steps. If more than one: the weighs for each step.</param>
-		/// <returns>Disposable to stop this monitor. It can also be stopped by calling Finished()</returns>
-		ProgressSteps ConfigureSteps(params int[] steps);
+		/// <returns>IDisposable that calls Finished()</returns>
+		IDisposable ConfigureSteps(params int[] steps);
+
+		/// <summary>
+		/// Finishes the previous step and starts the next one.
+		/// </summary>
+		/// <param name="stepName">The next step name. Optional.</param>
+		void StartStep(string stepName = null);
+
+		/// <summary>
+		/// Create a monitor for sub-steps of the current step.
+		/// </summary>
+		ProgressMonitor CreateSubMonitor();
+
+		/// <summary>
+		/// Finishes all the steps. Must be the last method called.
+		/// </summary>
+		void Finished();
 	}
 
 	public static class ProgressMonitorExtensions
@@ -29,7 +45,9 @@ namespace org.pescuma.progressmonitor
 
 			int size;
 			if (c != null)
+			{
 				size = c.Count;
+			}
 			else
 			{
 				c = new List<T>();
@@ -40,12 +58,14 @@ namespace org.pescuma.progressmonitor
 
 			if (size > 0)
 			{
-				var steps = monitor.ConfigureSteps(size);
-
-				foreach (var el in c)
+				using (monitor.ConfigureSteps(size))
 				{
-					steps.StartStep(stepName(el));
-					yield return el;
+					foreach (var el in c)
+					{
+						monitor.StartStep(stepName(el));
+
+						yield return el;
+					}
 				}
 			}
 		}

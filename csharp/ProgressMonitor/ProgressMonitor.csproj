@@ -51,7 +51,6 @@
     <Compile Include="console\MachineReadableConsole.cs" />
     <Compile Include="console\MachineReadableConsoleFlatProgressMonitor.cs" />
     <Compile Include="ProgressReporter.cs" />
-    <Compile Include="ProgressSteps.cs" />
     <Compile Include="ProgressMonitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="console\widget\BarWidget.cs" />

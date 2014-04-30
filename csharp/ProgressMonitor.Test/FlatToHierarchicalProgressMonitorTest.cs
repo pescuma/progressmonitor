@@ -37,8 +37,8 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestStart()
 		{
-			var steps = progress.ConfigureSteps(1);
-			steps.StartStep();
+			progress.ConfigureSteps(1);
+			progress.StartStep();
 
 			flat.Verify(f => f.SetCurrent(0, 1000, ""));
 		}
@@ -46,9 +46,9 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void Test2Steps()
 		{
-			var steps = progress.ConfigureSteps(2);
-			steps.StartStep();
-			steps.StartStep();
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+			progress.StartStep();
 
 			flat.Verify(f => f.SetCurrent(500, 1000, ""));
 		}
@@ -56,9 +56,9 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void Test2Steps19()
 		{
-			var steps = progress.ConfigureSteps(1, 9);
-			steps.StartStep();
-			steps.StartStep();
+			progress.ConfigureSteps(1, 9);
+			progress.StartStep();
+			progress.StartStep();
 
 			flat.Verify(f => f.SetCurrent(100, 1000, ""));
 		}
@@ -66,10 +66,10 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void Test2Steps172()
 		{
-			var steps = progress.ConfigureSteps(1, 7, 2);
-			steps.StartStep();
-			steps.StartStep();
-			steps.StartStep();
+			progress.ConfigureSteps(1, 7, 2);
+			progress.StartStep();
+			progress.StartStep();
+			progress.StartStep();
 
 			flat.Verify(f => f.SetCurrent(800, 1000, ""));
 		}
@@ -77,8 +77,8 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestDispose_NotStarted()
 		{
-			var steps = progress.ConfigureSteps(1);
-			steps.Dispose();
+			var disp = progress.ConfigureSteps(1);
+			disp.Dispose();
 
 			flat.Verify(f => f.SetCurrent(1000, 1000, ""), Times.Never);
 		}
@@ -86,9 +86,9 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestFinished_UsedAll()
 		{
-			var steps = progress.ConfigureSteps(1);
-			steps.StartStep();
-			steps.Finished();
+			progress.ConfigureSteps(1);
+			progress.StartStep();
+			progress.Finished();
 
 			flat.Verify(f => f.SetCurrent(1000, 1000));
 		}
@@ -96,9 +96,9 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestFinished_NotUsedAll()
 		{
-			var steps = progress.ConfigureSteps(10);
-			steps.StartStep();
-			steps.Finished();
+			progress.ConfigureSteps(10);
+			progress.StartStep();
+			progress.Finished();
 
 			flat.Verify(f => f.SetCurrent(1000, 1000));
 		}
@@ -106,8 +106,8 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestStepName()
 		{
-			var steps = progress.ConfigureSteps(1);
-			steps.StartStep("A");
+			progress.ConfigureSteps(1);
+			progress.StartStep("A");
 
 			flat.Verify(f => f.SetCurrent(0, 1000, "A"));
 		}
@@ -115,10 +115,10 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestSubStep_ConfigureDoesntPropagate()
 		{
-			var steps = progress.ConfigureSteps(2);
-			steps.StartStep();
+			progress.ConfigureSteps(2);
+			progress.StartStep();
 
-			var sub = steps.CreateSubMonitor();
+			var sub = progress.CreateSubMonitor();
 			sub.ConfigureSteps(2);
 
 			flat.Verify(f => f.SetCurrent(0, 1000, ""), Times.Once);
@@ -128,11 +128,11 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestSubStep_DisposeDoesntPropagate()
 		{
-			var steps = progress.ConfigureSteps(2);
-			steps.StartStep();
+			progress.ConfigureSteps(2);
+			progress.StartStep();
 
-			var sub = steps.CreateSubMonitor()
-				.ConfigureSteps(2);
+			var sub = progress.CreateSubMonitor();
+			sub.ConfigureSteps(2);
 			sub.StartStep();
 			sub.Finished();
 
@@ -143,11 +143,11 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestSubStep_StepPropagates()
 		{
-			var steps = progress.ConfigureSteps(2);
-			steps.StartStep();
+			progress.ConfigureSteps(2);
+			progress.StartStep();
 
-			var sub = steps.CreateSubMonitor()
-				.ConfigureSteps(2);
+			var sub = progress.CreateSubMonitor();
+			sub.ConfigureSteps(2);
 			sub.StartStep();
 			sub.StartStep();
 
@@ -157,11 +157,11 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestSubStep_SetStepNamePropagates()
 		{
-			var steps = progress.ConfigureSteps(2);
-			steps.StartStep("A");
+			progress.ConfigureSteps(2);
+			progress.StartStep("A");
 
-			var sub = steps.CreateSubMonitor()
-				.ConfigureSteps(2);
+			var sub = progress.CreateSubMonitor();
+			sub.ConfigureSteps(2);
 			sub.StartStep("B");
 
 			flat.Verify(f => f.SetCurrent(0, 1000, "A", "B"));
@@ -178,8 +178,8 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestOnStarted_CalledOnFirstStart()
 		{
-			var steps = progress.ConfigureSteps(2);
-			steps.StartStep();
+			progress.ConfigureSteps(2);
+			progress.StartStep();
 
 			Assert.AreEqual(1, onStartedCalls);
 		}
@@ -187,9 +187,9 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestOnStarted_CalledOnMultipleStart()
 		{
-			var steps = progress.ConfigureSteps(2);
-			steps.StartStep();
-			steps.StartStep();
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+			progress.StartStep();
 
 			Assert.AreEqual(2, onStartedCalls);
 		}
@@ -197,10 +197,10 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestOnStarted_NotCalledOnFinish()
 		{
-			var steps = progress.ConfigureSteps(2);
-			steps.StartStep();
-			steps.StartStep();
-			steps.Finished();
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+			progress.StartStep();
+			progress.Finished();
 
 			Assert.AreEqual(2, onStartedCalls);
 		}
@@ -208,8 +208,8 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestOnFinished_NotCalledOnStart()
 		{
-			var steps = progress.ConfigureSteps(2);
-			steps.StartStep();
+			progress.ConfigureSteps(2);
+			progress.StartStep();
 
 			Assert.AreEqual(0, onFinishedCalls);
 		}
@@ -217,9 +217,9 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestOnFinished_CalledOnMulitpleStarts()
 		{
-			var steps = progress.ConfigureSteps(2);
-			steps.StartStep();
-			steps.StartStep();
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+			progress.StartStep();
 
 			Assert.AreEqual(1, onFinishedCalls);
 		}
@@ -227,10 +227,10 @@ namespace org.pescuma.progressmonitor
 		[Test]
 		public void TestOnFinished_CalledOnFinish()
 		{
-			var steps = progress.ConfigureSteps(2);
-			steps.StartStep();
-			steps.StartStep();
-			steps.Finished();
+			progress.ConfigureSteps(2);
+			progress.StartStep();
+			progress.StartStep();
+			progress.Finished();
 
 			Assert.AreEqual(2, onFinishedCalls);
 		}
