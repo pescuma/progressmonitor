@@ -85,5 +85,21 @@ namespace org.pescuma.progressmonitor.utils
 			else
 				result.Insert(0, string.Format("{0}{1}", val, name));
 		}
+
+		// From http://stackoverflow.com/questions/3635564/greatest-common-divisor-from-a-set-of-more-than-2-integers
+		public static int GetGCD(int a, int b)
+		{
+			if (a == 0)
+				return b;
+
+			while (b != 0)
+			{
+				var max = Math.Max(a, b);
+				a = Math.Min(a, b);
+				b = max % a;
+			}
+
+			return a;
+		}
 	}
 }

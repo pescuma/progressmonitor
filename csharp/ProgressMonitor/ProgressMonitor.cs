@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace org.pescuma.progressmonitor
 {
@@ -19,8 +20,11 @@ namespace org.pescuma.progressmonitor
 		/// 
 		/// If this enum is not a Collection, all of its elements will be cached to compute the size before the iteration.
 		/// </summary>
-		public static IEnumerable<T> Wrap<T>(this ProgressMonitor monitor, IEnumerable<T> list)
+		public static IEnumerable<T> Wrap<T>(this ProgressMonitor monitor, IEnumerable<T> list, Func<T, string> stepName = null)
 		{
+			if (stepName == null)
+				stepName = a => null;
+
 			var c = list as ICollection<T>;
 
 			int size;
@@ -40,7 +44,7 @@ namespace org.pescuma.progressmonitor
 
 				foreach (var el in c)
 				{
-					steps.StartStep();
+					steps.StartStep(stepName(el));
 					yield return el;
 				}
 			}
