@@ -20,7 +20,13 @@ namespace org.pescuma.progressmonitor.devel
 		{
 			steps = new Step[aSteps.Length == 1 ? aSteps[0] : aSteps.Length];
 
-			return next.ConfigureSteps(aSteps);
+			next.ConfigureSteps(aSteps);
+
+			return new ActionDisposable(() =>
+			{
+				if (currentStep >= 0 && currentStep < steps.Length)
+					Finished();
+			});
 		}
 
 		public void StartStep(string stepName = null)
@@ -47,6 +53,8 @@ namespace org.pescuma.progressmonitor.devel
 			next.Finished();
 
 			DumpTimes();
+
+			currentStep++;
 		}
 
 		private void OnFinishedStep()
