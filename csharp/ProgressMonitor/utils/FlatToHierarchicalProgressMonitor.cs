@@ -9,7 +9,6 @@ namespace org.pescuma.progressmonitor.utils
 		private readonly FlatToHierarchicalProgressMonitor parent;
 		private readonly string[] name;
 
-		private bool configured;
 		private int[] steps;
 		private int currentStep = -1;
 		private string currentStepName;
@@ -72,9 +71,8 @@ namespace org.pescuma.progressmonitor.utils
 
 		public IDisposable ConfigureSteps(params int[] aSteps)
 		{
-			if (configured)
+			if (WasConfigured)
 				throw new InvalidOperationException("Alteady configured");
-			configured = true;
 
 			if (aSteps.Length < 1)
 				throw new ArgumentException();
@@ -97,6 +95,11 @@ namespace org.pescuma.progressmonitor.utils
 				if (HasStarted && !HasFinished)
 					Finished();
 			});
+		}
+
+		private bool WasConfigured
+		{
+			get { return steps != null; }
 		}
 
 		private bool HasStarted
