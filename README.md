@@ -13,7 +13,8 @@ using (monitor.ConfigureSteps(1, 4, 5)) {
   monitor.StartStep("First step with weight 1");
   ...
   monitor.StartStep("Second step with weight 4");
-  ...
+  DoSomething(monitor.CreateSubMonitor());
+  
   monitor.Report("Still working...");
   ...
   monitor.StartStep("Third step with weight 5");
