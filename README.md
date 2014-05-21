@@ -18,10 +18,9 @@ using (monitor.ConfigureSteps(1, 4, 5)) {
   ...
   monitor.StartStep("Third step with weight 5");
   ...
-
 }
 ```
 
 ### Installing
 
-  PM> Install-Package ProgressMonitor 
+    PM> Install-Package ProgressMonitor 
