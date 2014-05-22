@@ -6,12 +6,14 @@ namespace org.pescuma.progressmonitor.utils
 	public class FlatToHierarchicalProgressMonitor : ProgressMonitor
 	{
 		private readonly FilteredFlatProgressMonitor flat;
+		private readonly int minOutupWaitInMs;
 		private readonly FlatToHierarchicalProgressMonitor parent;
 		private readonly string[] name;
 
 		private int[] steps;
 		private int currentStep = -1;
 		private string currentStepName;
+		private int lastStartStepTickCount;
 
 		public event Action<string[]> AfterStartedStep;
 		public event Action<string[]> BeforeFinishedStep;
@@ -56,17 +58,23 @@ namespace org.pescuma.progressmonitor.utils
 			this.flat = new FilteredFlatProgressMonitor(flat);
 			parent = null;
 
+			if (flat is MaxThroughputProgressMonitor)
+				minOutupWaitInMs = ((MaxThroughputProgressMonitor) flat).MinOutupWaitInMs;
+			else
+				minOutupWaitInMs = -1;
+
 			if (!string.IsNullOrEmpty(prefix))
 				name = new[] { prefix };
 			else
 				name = new string[0];
 		}
 
-		private FlatToHierarchicalProgressMonitor(FlatToHierarchicalProgressMonitor parent, string[] name)
+		private FlatToHierarchicalProgressMonitor(FlatToHierarchicalProgressMonitor parent, string[] name, int minOutupWaitInMs)
 		{
 			flat = parent.flat;
 			this.parent = parent;
 			this.name = name;
+			this.minOutupWaitInMs = minOutupWaitInMs;
 		}
 
 		public IDisposable ConfigureSteps(params int[] aSteps)
@@ -131,9 +139,23 @@ namespace org.pescuma.progressmonitor.utils
 			if (currentStep + 1 >= steps.Length)
 				throw new InvalidOperationException("All configured steps were already used");
 
+			stepName = stepName ?? "";
+
+			var hasStarted = HasStarted;
+			var tickCount = Environment.TickCount;
+			var skipBecauseTooFast = (hasStarted && currentStepName == stepName && lastStartStepTickCount + minOutupWaitInMs > tickCount);
+
+			if (skipBecauseTooFast)
+			{
+				currentStep++;
+				return;
+			}
+
+			lastStartStepTickCount = tickCount;
+
 			var root = GetRoot();
 
-			if (HasStarted)
+			if (hasStarted)
 			{
 				var onFinishedStep = root.BeforeFinishedStep;
 				if (onFinishedStep != null)
@@ -141,7 +163,7 @@ namespace org.pescuma.progressmonitor.utils
 			}
 
 			currentStep++;
-			currentStepName = stepName ?? "";
+			currentStepName = stepName;
 
 			var newName = GetFullStepName();
 
@@ -201,7 +223,7 @@ namespace org.pescuma.progressmonitor.utils
 		{
 			CheckRunning();
 
-			return new FlatToHierarchicalProgressMonitor(this, GetFullStepName());
+			return new FlatToHierarchicalProgressMonitor(this, GetFullStepName(), minOutupWaitInMs);
 		}
 
 		private void CheckRunning()

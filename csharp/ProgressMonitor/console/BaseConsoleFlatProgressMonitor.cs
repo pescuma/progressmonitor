@@ -3,15 +3,18 @@ using org.pescuma.progressmonitor.utils;
 
 namespace org.pescuma.progressmonitor.console
 {
-	public abstract class BaseConsoleFlatProgressMonitor : FlatProgressMonitor
+	public abstract class BaseConsoleFlatProgressMonitor : FlatProgressMonitor, MaxThroughputProgressMonitor
 	{
-		private const int MIN_UPDATE_TIME_MS = 500;
-
 		private int? lastTickCount;
 		protected double LastPercent;
 		protected string[] LastStepName;
 
 		protected bool HasFinished;
+
+		public int MinOutupWaitInMs
+		{
+			get { return 500; }
+		}
 
 		public void SetCurrent(int current, int total, params string[] stepName)
 		{
@@ -24,17 +27,18 @@ namespace org.pescuma.progressmonitor.console
 			var tickCount = Environment.TickCount;
 			var percent = current / (double) total;
 
-			var output = false;
+			bool output;
 			if (finished)
 				output = true;
 			else if (lastTickCount == null)
 				output = true;
 			else if (!Utils.ArrayEqual(stepName, LastStepName))
 				output = true;
-			else if (lastTickCount.Value + MIN_UPDATE_TIME_MS > tickCount)
-				// ReSharper disable once RedundantAssignment
+			else if (lastTickCount.Value + MinOutupWaitInMs > tickCount)
 				output = false;
 			else if (percent > LastPercent)
+				output = true;
+			else
 				output = true;
 
 			if (!output)
