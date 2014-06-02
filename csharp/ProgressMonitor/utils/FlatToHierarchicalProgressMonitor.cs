@@ -137,7 +137,10 @@ namespace org.pescuma.progressmonitor.utils
 		public void StartStep(string stepName = null)
 		{
 			if (currentStep + 1 >= steps.Length)
-				throw new InvalidOperationException("All configured steps were already used");
+			{
+				ReportDetail("[ProgressMonitor] All configured steps were already used (inside " + string.Join(" ", name) + ")");
+				return;
+			}
 
 			stepName = stepName ?? "";
 
