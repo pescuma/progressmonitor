@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using org.pescuma.progressmonitor.console.widget;
 using org.pescuma.progressmonitor.utils;
@@ -32,7 +33,17 @@ namespace org.pescuma.progressmonitor.console
 
 		private int ConsoleWidth
 		{
-			get { return Console.BufferWidth - 1; }
+			get
+			{
+				try
+				{
+					return Console.BufferWidth - 1;
+				}
+				catch (IOException)
+				{
+					return 79;
+				}
+			}
 		}
 
 		protected override void OnStart()
@@ -119,7 +130,7 @@ namespace org.pescuma.progressmonitor.console
 			if (wasShowingProgress)
 				ClearLine();
 
-			Utils.ConsoleWriteLine(Utils.Format(message), color);
+			Utils.ConsoleWriteLine(color, message);
 
 			if (wasShowingProgress)
 				OutputProgress();

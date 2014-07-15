@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -18,19 +19,31 @@ namespace org.pescuma.progressmonitor.utils
 					.ToArray());
 		}
 
-		public static void ConsoleWriteLine(string message, ConsoleColor? color)
+		public static void ConsoleWriteLine(ConsoleColor? color, params string[] message)
 		{
-			var old = ConsoleColor.Gray;
-			if (color != null)
+			var text = Format(message);
+
+			var wrote = false;
+			try
 			{
-				old = Console.ForegroundColor;
-				Console.ForegroundColor = color.Value;
+				var old = ConsoleColor.Gray;
+				if (color != null)
+				{
+					old = Console.ForegroundColor;
+					Console.ForegroundColor = color.Value;
+				}
+
+				Console.WriteLine(text);
+				wrote = true;
+
+				if (color != null)
+					Console.ForegroundColor = old;
 			}
-
-			Console.WriteLine(message);
-
-			if (color != null)
-				Console.ForegroundColor = old;
+			catch (IOException)
+			{
+				if (!wrote)
+					Console.WriteLine(text);
+			}
 		}
 
 		public static bool ArrayEqual<T>(T[] a, T[] b)
