@@ -1,27 +1,22 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace org.pescuma.progressmonitor.utils
 {
 	internal static class Utils
 	{
-		public static string Format(string[] message)
+		public static string Format(string message, params object[] args)
 		{
-			if (message.Length < 1)
-				return "";
-			else if (message.Length == 1)
-				return message[0];
+			if (args.Length < 1)
+				return message;
 			else
-// ReSharper disable once RedundantCast
-				return string.Format(message[0], (string[]) message.Skip(1)
-					.ToArray());
+				return string.Format(message, args);
 		}
 
-		public static void ConsoleWriteLine(ConsoleColor? color, params string[] message)
+		public static void ConsoleWriteLine(ConsoleColor? color, string message, params object[] args)
 		{
-			var text = Format(message);
+			var text = Format(message, args);
 
 			var wrote = false;
 			try

@@ -10,9 +10,9 @@ namespace org.pescuma.progressmonitor.console
 			Utils.ConsoleWriteLine(ConsoleColor.Black, MachineReadableConsole.ToConsole(current, total, stepName));
 		}
 
-		protected override void ReportWithColor(string[] message, ConsoleColor? color)
+		protected override void ReportWithColor(string message, object[] args, ConsoleColor? color)
 		{
-			Utils.ConsoleWriteLine(color, message);
+			Utils.ConsoleWriteLine(color, message, args);
 		}
 	}
 }

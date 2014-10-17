@@ -237,24 +237,24 @@ namespace org.pescuma.progressmonitor.utils
 				throw new InvalidOperationException("Already finished");
 		}
 
-		public void Report(params string[] message)
+		public void Report(string message, params object[] args)
 		{
-			flat.Report(message);
+			flat.Report(message, args);
 		}
 
-		public void ReportDetail(params string[] message)
+		public void ReportDetail(string message, params object[] args)
 		{
-			flat.ReportDetail(message);
+			flat.ReportDetail(message, args);
 		}
 
-		public void ReportWarning(params string[] message)
+		public void ReportWarning(string message, params object[] args)
 		{
-			flat.ReportWarning(message);
+			flat.ReportWarning(message, args);
 		}
 
-		public void ReportError(params string[] message)
+		public void ReportError(string message, params object[] args)
 		{
-			flat.ReportError(message);
+			flat.ReportError(message, args);
 		}
 	}
 }

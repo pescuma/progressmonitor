@@ -81,24 +81,24 @@ namespace org.pescuma.progressmonitor.devel
 				Console.WriteLine("Step {0} - {1} : {2}", i, steps[i].Name, steps[i].Size);
 		}
 
-		public void Report(params string[] message)
+		public void Report(string message, params object[] args)
 		{
-			next.Report(message);
+			next.Report(message, args);
 		}
 
-		public void ReportDetail(params string[] message)
+		public void ReportDetail(string message, params object[] args)
 		{
-			next.ReportDetail(message);
+			next.ReportDetail(message, args);
 		}
 
-		public void ReportWarning(params string[] message)
+		public void ReportWarning(string message, params object[] args)
 		{
-			next.ReportWarning(message);
+			next.ReportWarning(message, args);
 		}
 
-		public void ReportError(params string[] message)
+		public void ReportError(string message, params object[] args)
 		{
-			next.ReportError(message);
+			next.ReportError(message, args);
 		}
 
 		private struct Step

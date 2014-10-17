@@ -61,26 +61,26 @@ namespace org.pescuma.progressmonitor.console
 
 		protected abstract void WriteToConsole(int current, int total, string[] stepName);
 
-		public void Report(params string[] message)
+		public void Report(string message, params object[] args)
 		{
-			ReportWithColor(message, null);
+			ReportWithColor(message, args, null);
 		}
 
-		public void ReportDetail(params string[] message)
+		public void ReportDetail(string message, params object[] args)
 		{
-			ReportWithColor(message, ConsoleColor.DarkGray);
+			ReportWithColor(message, args, ConsoleColor.DarkGray);
 		}
 
-		public void ReportWarning(params string[] message)
+		public void ReportWarning(string message, params object[] args)
 		{
-			ReportWithColor(message, ConsoleColor.DarkYellow);
+			ReportWithColor(message, args, ConsoleColor.DarkYellow);
 		}
 
-		public void ReportError(params string[] message)
+		public void ReportError(string message, params object[] args)
 		{
-			ReportWithColor(message, ConsoleColor.Red);
+			ReportWithColor(message, args, ConsoleColor.Red);
 		}
 
-		protected abstract void ReportWithColor(string[] message, ConsoleColor? color);
+		protected abstract void ReportWithColor(string message, object[] args, ConsoleColor? color);
 	}
 }

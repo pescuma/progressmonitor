@@ -23,36 +23,36 @@
 			next.SetCurrent(current, total, stepName);
 		}
 
-		public void Report(params string[] message)
+		public void Report(string message, params object[] args)
 		{
 			if (DontOutputReports)
 				return;
 
-			next.Report(message);
+			next.Report(message, args);
 		}
 
-		public void ReportDetail(params string[] message)
+		public void ReportDetail(string message, params object[] args)
 		{
 			if (DontOutputReportDetails)
 				return;
 
-			next.ReportDetail(message);
+			next.ReportDetail(message, args);
 		}
 
-		public void ReportWarning(params string[] message)
+		public void ReportWarning(string message, params object[] args)
 		{
 			if (DontOutputReportWarnings)
 				return;
 
-			next.ReportWarning(message);
+			next.ReportWarning(message, args);
 		}
 
-		public void ReportError(params string[] message)
+		public void ReportError(string message, params object[] args)
 		{
 			if (DontOutputReportErrors)
 				return;
 
-			next.ReportError(message);
+			next.ReportError(message, args);
 		}
 	}
 }
