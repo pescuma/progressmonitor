@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>ProgressMonitor</id>
+		<version>$version$</version>
+        <title>ProgressMonitor</title>
+        <authors>pescuma</authors>
+        <owners>pescuma</owners>
+        <projectUrl>https://github.com/pescuma/progressmonitor</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>A library to allow reporting progress of long tasks to the user.</description>
+        <copyright>Copyright © Ricardo Pescuma Domenecci 2014</copyright>
+    </metadata>
+    <files />
+</package>

@@ -1,0 +1,1 @@
+nuget Pack ..\ProgressMonitor\ProgressMonitor.csproj -Symbols
