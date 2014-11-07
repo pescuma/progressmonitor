@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using org.pescuma.progressmonitor.utils;
 
@@ -7,13 +8,18 @@ namespace org.pescuma.progressmonitor.devel
 	public class ComputeRelativeTimesProgressMonitor : ProgressMonitor
 	{
 		private readonly ProgressMonitor next;
+		private readonly Action<string> writeLine;
 		private Step[] steps;
 		private int currentStep = -1;
 		private DateTime start;
 
-		public ComputeRelativeTimesProgressMonitor(ProgressMonitor next)
+		public ComputeRelativeTimesProgressMonitor(ProgressMonitor next, Action<string> writeLine = null)
 		{
+			if (writeLine == null)
+				writeLine = s => Debug.WriteLine(s);
+
 			this.next = next;
+			this.writeLine = writeLine;
 		}
 
 		public IDisposable ConfigureSteps(params int[] aSteps)
@@ -78,7 +84,7 @@ namespace org.pescuma.progressmonitor.devel
 				steps[i].Size = steps[i].Size / gcd;
 
 			for (int i = 0; i < steps.Length; i++)
-				Console.WriteLine("Step {0} - {1} : {2}", i, steps[i].Name, steps[i].Size);
+				writeLine(string.Format("Step {0} - {1} : {2}", i, steps[i].Name, steps[i].Size));
 		}
 
 		public void Report(string message, params object[] args)
