@@ -38,4 +38,4 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyVersion("0.3.0.0")]
 [assembly: AssemblyFileVersion("0.3.0.0")]
-[assembly: InternalsVisibleTo("ProgressMonitor.Test")]
+[assembly: InternalsVisibleTo("ProgressMonitor.Test, PublicKey=002400000480000094000000060200000024000052534131000400000100010011e4b1df63b1ec298d8195aa43d17d28f8eb17a0e2c3036d8475cca68f5ff9a632c67865a2dfdfd6f61e3f670ab7e3521405686f6d6fd355ccbbc266078ea8d8d185ec2a10089abaf2d78113f7e041637089a64cb3e028c9a5aa6ce48dbc50dc6f7b2aac1fab554ad1d9538d637639bde1689acb4c6c39e39a1d3139515fa4d1")]
