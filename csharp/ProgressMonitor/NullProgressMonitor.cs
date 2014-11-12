@@ -38,6 +38,11 @@ namespace org.pescuma.progressmonitor
 		{
 		}
 
+		public bool WasCanceled
+		{
+			get { return false; }
+		}
+
 		private class NullIDisposable : IDisposable
 		{
 			public void Dispose()

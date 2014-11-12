@@ -8,18 +8,18 @@ namespace org.pescuma.progressmonitor.devel
 	public class ComputeRelativeTimesProgressMonitor : ProgressMonitor
 	{
 		private readonly ProgressMonitor next;
-		private readonly Action<string> writeLine;
+		private readonly Action<string> writer;
 		private Step[] steps;
 		private int currentStep = -1;
 		private DateTime start;
 
-		public ComputeRelativeTimesProgressMonitor(ProgressMonitor next, Action<string> writeLine = null)
+		public ComputeRelativeTimesProgressMonitor(ProgressMonitor next, Action<string> writer = null)
 		{
-			if (writeLine == null)
-				writeLine = s => Debug.WriteLine(s);
+			if (writer == null)
+				writer = s => Debug.WriteLine(s);
 
 			this.next = next;
-			this.writeLine = writeLine;
+			this.writer = writer;
 		}
 
 		public IDisposable ConfigureSteps(params int[] aSteps)
@@ -83,8 +83,7 @@ namespace org.pescuma.progressmonitor.devel
 			for (int i = 0; i < steps.Length; i++)
 				steps[i].Size = steps[i].Size / gcd;
 
-			for (int i = 0; i < steps.Length; i++)
-				writeLine(string.Format("Step {0} - {1} : {2}", i, steps[i].Name, steps[i].Size));
+			writer(string.Join("\n", steps.Select((s, i) => string.Format("Step {0} - {1} : {2}", i, s.Name, s.Size))));
 		}
 
 		public void Report(string message, params object[] args)
@@ -105,6 +104,11 @@ namespace org.pescuma.progressmonitor.devel
 		public void ReportError(string message, params object[] args)
 		{
 			next.ReportError(message, args);
+		}
+
+		public bool WasCanceled
+		{
+			get { return next.WasCanceled; }
 		}
 
 		private struct Step

@@ -14,5 +14,10 @@ namespace org.pescuma.progressmonitor.console
 			: base(null, new ConsoleFlatProgressMonitor(widgets))
 		{
 		}
+
+		public void RequestCancel()
+		{
+			((ConsoleFlatProgressMonitor) Flat).RequestCancel();
+		}
 	}
 }

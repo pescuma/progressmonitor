@@ -82,5 +82,12 @@ namespace org.pescuma.progressmonitor.console
 		}
 
 		protected abstract void ReportWithColor(string message, object[] args, ConsoleColor? color);
+
+		public bool WasCanceled { get; private set; }
+
+		public void RequestCancel()
+		{
+			WasCanceled = true;
+		}
 	}
 }

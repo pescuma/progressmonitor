@@ -8,5 +8,10 @@ namespace org.pescuma.progressmonitor.console
 			: base(prefix, new MachineReadableConsoleFlatProgressMonitor())
 		{
 		}
+
+		public void RequestCancel()
+		{
+			((MachineReadableConsoleFlatProgressMonitor) Flat).RequestCancel();
+		}
 	}
 }

@@ -54,6 +54,7 @@
     <Compile Include="devel\ComputeRelativeTimesProgressMonitor.cs" />
     <Compile Include="MaxThroughputProgressMonitor.cs" />
     <Compile Include="NullProgressMonitor.cs" />
+    <Compile Include="ProgressCanceler.cs" />
     <Compile Include="utils\ActionDisposable.cs" />
     <Compile Include="utils\FilteredFlatProgressMonitor.cs" />
     <Compile Include="utils\FlatToHierarchicalProgressMonitor.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="console\widget\PercentageWidget.cs" />
     <Compile Include="console\widget\StepNameWidget.cs" />
     <Compile Include="FlatProgressMonitor.cs" />
+    <Compile Include="utils\ThrowOnCancelledProgressMonitor.cs" />
     <Compile Include="utils\Utils.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -54,5 +54,10 @@
 
 			next.ReportError(message, args);
 		}
+
+		public bool WasCanceled
+		{
+			get { return next.WasCanceled; }
+		}
 	}
 }

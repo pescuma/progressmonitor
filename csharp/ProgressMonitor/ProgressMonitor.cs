@@ -3,7 +3,10 @@ using System.Collections.Generic;
 
 namespace org.pescuma.progressmonitor
 {
-	public interface ProgressMonitor : ProgressReporter
+	/// <summary>
+	/// A hierarchical progress monitor.
+	/// </summary>
+	public interface ProgressMonitor : ProgressReporter, ProgressCanceler
 	{
 		/// <summary>
 		/// Configure the number of steps. Must be called before StartStep

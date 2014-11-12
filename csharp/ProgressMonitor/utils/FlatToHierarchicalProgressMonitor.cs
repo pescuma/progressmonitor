@@ -5,8 +5,8 @@ namespace org.pescuma.progressmonitor.utils
 {
 	public class FlatToHierarchicalProgressMonitor : ProgressMonitor
 	{
-		private readonly FilteredFlatProgressMonitor flat;
-		private readonly int minOutupWaitInMs;
+		protected readonly FlatProgressMonitor Flat;
+		private readonly FilteredFlatProgressMonitor filteredFlat;
 		private readonly FlatToHierarchicalProgressMonitor parent;
 		private readonly string[] name;
 
@@ -20,32 +20,44 @@ namespace org.pescuma.progressmonitor.utils
 
 		public bool DontOutputProgress
 		{
-			get { return flat.DontOutputProgress; }
-			set { flat.DontOutputProgress = value; }
+			get { return filteredFlat.DontOutputProgress; }
+			set { filteredFlat.DontOutputProgress = value; }
 		}
 
 		public bool DontOutputReports
 		{
-			get { return flat.DontOutputReports; }
-			set { flat.DontOutputReports = value; }
+			get { return filteredFlat.DontOutputReports; }
+			set { filteredFlat.DontOutputReports = value; }
 		}
 
 		public bool DontOutputReportDetails
 		{
-			get { return flat.DontOutputReportDetails; }
-			set { flat.DontOutputReportDetails = value; }
+			get { return filteredFlat.DontOutputReportDetails; }
+			set { filteredFlat.DontOutputReportDetails = value; }
 		}
 
 		public bool DontOutputReportWarnings
 		{
-			get { return flat.DontOutputReportWarnings; }
-			set { flat.DontOutputReportWarnings = value; }
+			get { return filteredFlat.DontOutputReportWarnings; }
+			set { filteredFlat.DontOutputReportWarnings = value; }
 		}
 
 		public bool DontOutputReportErrors
 		{
-			get { return flat.DontOutputReportErrors; }
-			set { flat.DontOutputReportErrors = value; }
+			get { return filteredFlat.DontOutputReportErrors; }
+			set { filteredFlat.DontOutputReportErrors = value; }
+		}
+
+		private int? MinOutupWaitInMs
+		{
+			get
+			{
+				var throughput = Flat as MaxThroughputProgressMonitor;
+				if (throughput == null)
+					return null;
+				else
+					return throughput.MinOutupWaitInMs;
+			}
 		}
 
 		public FlatToHierarchicalProgressMonitor(FlatProgressMonitor flat)
@@ -55,13 +67,9 @@ namespace org.pescuma.progressmonitor.utils
 
 		public FlatToHierarchicalProgressMonitor(string prefix, FlatProgressMonitor flat)
 		{
-			this.flat = new FilteredFlatProgressMonitor(flat);
+			Flat = flat;
+			filteredFlat = new FilteredFlatProgressMonitor(flat);
 			parent = null;
-
-			if (flat is MaxThroughputProgressMonitor)
-				minOutupWaitInMs = ((MaxThroughputProgressMonitor) flat).MinOutupWaitInMs;
-			else
-				minOutupWaitInMs = -1;
 
 			if (!string.IsNullOrEmpty(prefix))
 				name = new[] { prefix };
@@ -69,12 +77,11 @@ namespace org.pescuma.progressmonitor.utils
 				name = new string[0];
 		}
 
-		private FlatToHierarchicalProgressMonitor(FlatToHierarchicalProgressMonitor parent, string[] name, int minOutupWaitInMs)
+		private FlatToHierarchicalProgressMonitor(FlatToHierarchicalProgressMonitor parent, string[] name)
 		{
-			flat = parent.flat;
+			filteredFlat = parent.filteredFlat;
 			this.parent = parent;
 			this.name = name;
-			this.minOutupWaitInMs = minOutupWaitInMs;
 		}
 
 		public IDisposable ConfigureSteps(params int[] aSteps)
@@ -145,16 +152,20 @@ namespace org.pescuma.progressmonitor.utils
 			stepName = stepName ?? "";
 
 			var hasStarted = HasStarted;
-			var tickCount = Environment.TickCount;
-			var skipBecauseTooFast = (hasStarted && currentStepName == stepName && lastStartStepTickCount + minOutupWaitInMs > tickCount);
 
-			if (skipBecauseTooFast)
+			var minWait = MinOutupWaitInMs;
+			if (minWait != null)
 			{
-				currentStep++;
-				return;
-			}
+				var tickCount = Environment.TickCount;
 
-			lastStartStepTickCount = tickCount;
+				if (hasStarted && currentStepName == stepName && lastStartStepTickCount - tickCount > minWait.Value)
+				{
+					currentStep++;
+					return;
+				}
+
+				lastStartStepTickCount = tickCount;
+			}
 
 			var root = GetRoot();
 
@@ -217,7 +228,7 @@ namespace org.pescuma.progressmonitor.utils
 		private void SetCurrent(int current, int total, params string[] stepName)
 		{
 			if (parent == null)
-				flat.SetCurrent(current, total, stepName);
+				filteredFlat.SetCurrent(current, total, stepName);
 			else
 				parent.OnChildChange(current, total, stepName);
 		}
@@ -226,7 +237,7 @@ namespace org.pescuma.progressmonitor.utils
 		{
 			CheckRunning();
 
-			return new FlatToHierarchicalProgressMonitor(this, GetFullStepName(), minOutupWaitInMs);
+			return new FlatToHierarchicalProgressMonitor(this, GetFullStepName());
 		}
 
 		private void CheckRunning()
@@ -239,22 +250,27 @@ namespace org.pescuma.progressmonitor.utils
 
 		public void Report(string message, params object[] args)
 		{
-			flat.Report(message, args);
+			filteredFlat.Report(message, args);
 		}
 
 		public void ReportDetail(string message, params object[] args)
 		{
-			flat.ReportDetail(message, args);
+			filteredFlat.ReportDetail(message, args);
 		}
 
 		public void ReportWarning(string message, params object[] args)
 		{
-			flat.ReportWarning(message, args);
+			filteredFlat.ReportWarning(message, args);
 		}
 
 		public void ReportError(string message, params object[] args)
 		{
-			flat.ReportError(message, args);
+			filteredFlat.ReportError(message, args);
+		}
+
+		public bool WasCanceled
+		{
+			get { return filteredFlat.WasCanceled; }
 		}
 	}
 }
