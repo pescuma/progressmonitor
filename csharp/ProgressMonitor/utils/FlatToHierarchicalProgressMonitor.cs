@@ -5,54 +5,29 @@ namespace org.pescuma.progressmonitor.utils
 {
 	public class FlatToHierarchicalProgressMonitor : ProgressMonitor
 	{
-		protected readonly FlatProgressMonitor Flat;
-		private readonly FilteredFlatProgressMonitor filteredFlat;
+		private readonly FilteredFlatProgressMonitor flat;
 		private readonly FlatToHierarchicalProgressMonitor parent;
-		private readonly string[] name;
+		private readonly string[] fullStepName;
 
 		private int[] steps;
 		private int currentStep = -1;
-		private string currentStepName;
 		private int lastStartStepTickCount;
 
-		public event Action<string[]> AfterStartedStep;
-		public event Action<string[]> BeforeFinishedStep;
+		// Cached data
+		private int stepsSum;
+		private int? currentStepSum;
 
-		public bool DontOutputProgress
+		private string CurrentStepName
 		{
-			get { return filteredFlat.DontOutputProgress; }
-			set { filteredFlat.DontOutputProgress = value; }
-		}
-
-		public bool DontOutputReports
-		{
-			get { return filteredFlat.DontOutputReports; }
-			set { filteredFlat.DontOutputReports = value; }
-		}
-
-		public bool DontOutputReportDetails
-		{
-			get { return filteredFlat.DontOutputReportDetails; }
-			set { filteredFlat.DontOutputReportDetails = value; }
-		}
-
-		public bool DontOutputReportWarnings
-		{
-			get { return filteredFlat.DontOutputReportWarnings; }
-			set { filteredFlat.DontOutputReportWarnings = value; }
-		}
-
-		public bool DontOutputReportErrors
-		{
-			get { return filteredFlat.DontOutputReportErrors; }
-			set { filteredFlat.DontOutputReportErrors = value; }
+			get { return fullStepName[fullStepName.Length - 1]; }
+			set { fullStepName[fullStepName.Length - 1] = value; }
 		}
 
 		private int? MinOutupWaitInMs
 		{
 			get
 			{
-				var throughput = Flat as MaxThroughputProgressMonitor;
+				var throughput = flat.Original as MaxThroughputProgressMonitor;
 				if (throughput == null)
 					return null;
 				else
@@ -60,34 +35,77 @@ namespace org.pescuma.progressmonitor.utils
 			}
 		}
 
+		protected FlatProgressMonitor Flat
+		{
+			get { return flat.Original; }
+		}
+
+		public FlatToHierarchicalProgressMonitor(string prefix, FlatProgressMonitor flat)
+		{
+			parent = null;
+			this.flat = new FilteredFlatProgressMonitor(flat);
+
+			if (!string.IsNullOrEmpty(prefix))
+				fullStepName = new[] { prefix, null };
+			else
+				fullStepName = new string[] { null };
+		}
+
+		private FlatToHierarchicalProgressMonitor(FlatToHierarchicalProgressMonitor parent, string[] name)
+		{
+			this.parent = parent;
+			flat = parent.flat;
+			fullStepName = Utils.ArrayAppendEmpty(name, 1);
+		}
+
+		public event Action<string[]> AfterStartedStep;
+		public event Action<string[]> BeforeFinishedStep;
+
+		public bool DontOutputProgress
+		{
+			get { return flat.DontOutputProgress; }
+			set { flat.DontOutputProgress = value; }
+		}
+
+		public bool DontOutputReports
+		{
+			get { return flat.DontOutputReports; }
+			set { flat.DontOutputReports = value; }
+		}
+
+		public bool DontOutputReportDetails
+		{
+			get { return flat.DontOutputReportDetails; }
+			set { flat.DontOutputReportDetails = value; }
+		}
+
+		public bool DontOutputReportWarnings
+		{
+			get { return flat.DontOutputReportWarnings; }
+			set { flat.DontOutputReportWarnings = value; }
+		}
+
+		public bool DontOutputReportErrors
+		{
+			get { return flat.DontOutputReportErrors; }
+			set { flat.DontOutputReportErrors = value; }
+		}
+
 		public FlatToHierarchicalProgressMonitor(FlatProgressMonitor flat)
 			: this(null, flat)
 		{
 		}
 
-		public FlatToHierarchicalProgressMonitor(string prefix, FlatProgressMonitor flat)
+		private void SetCurrentStep(int value)
 		{
-			Flat = flat;
-			filteredFlat = new FilteredFlatProgressMonitor(flat);
-			parent = null;
-
-			if (!string.IsNullOrEmpty(prefix))
-				name = new[] { prefix };
-			else
-				name = new string[0];
-		}
-
-		private FlatToHierarchicalProgressMonitor(FlatToHierarchicalProgressMonitor parent, string[] name)
-		{
-			filteredFlat = parent.filteredFlat;
-			this.parent = parent;
-			this.name = name;
+			currentStep = value;
+			currentStepSum = null;
 		}
 
 		public IDisposable ConfigureSteps(params int[] aSteps)
 		{
 			if (WasConfigured)
-				throw new InvalidOperationException("Alteady configured");
+				throw new InvalidOperationException("Already configured");
 
 			if (aSteps.Length < 1)
 				throw new ArgumentException();
@@ -104,6 +122,8 @@ namespace org.pescuma.progressmonitor.utils
 			{
 				steps = aSteps;
 			}
+
+			stepsSum = steps.Sum();
 
 			return new ActionDisposable(() =>
 			{
@@ -127,12 +147,6 @@ namespace org.pescuma.progressmonitor.utils
 			get { return currentStep >= steps.Length; }
 		}
 
-		private string[] GetFullStepName()
-		{
-			return name.Concat(new[] { currentStepName })
-				.ToArray();
-		}
-
 		private FlatToHierarchicalProgressMonitor GetRoot()
 		{
 			var cur = this;
@@ -145,7 +159,8 @@ namespace org.pescuma.progressmonitor.utils
 		{
 			if (currentStep + 1 >= steps.Length)
 			{
-				ReportDetail("[ProgressMonitor] All configured steps were already used (inside " + string.Join(" ", name) + ")");
+				ReportDetail("[ProgressMonitor] All configured steps were already used (inside " + string.Join(" ", fullStepName)
+					.Trim() + ")");
 				return;
 			}
 
@@ -158,9 +173,9 @@ namespace org.pescuma.progressmonitor.utils
 			{
 				var tickCount = Environment.TickCount;
 
-				if (hasStarted && currentStepName == stepName && lastStartStepTickCount - tickCount > minWait.Value)
+				if (hasStarted && CurrentStepName == stepName && lastStartStepTickCount - tickCount > minWait.Value)
 				{
-					currentStep++;
+					SetCurrentStep(currentStep + 1);
 					return;
 				}
 
@@ -173,13 +188,13 @@ namespace org.pescuma.progressmonitor.utils
 			{
 				var onFinishedStep = root.BeforeFinishedStep;
 				if (onFinishedStep != null)
-					onFinishedStep(GetFullStepName());
+					onFinishedStep(fullStepName);
 			}
 
-			currentStep++;
-			currentStepName = stepName;
+			SetCurrentStep(currentStep + 1);
+			CurrentStepName = stepName;
 
-			var newName = GetFullStepName();
+			var newName = fullStepName;
 
 			OnChildChange(0, 1, newName);
 
@@ -195,27 +210,35 @@ namespace org.pescuma.progressmonitor.utils
 			var onFinishedStep = GetRoot()
 				.BeforeFinishedStep;
 			if (onFinishedStep != null)
-				onFinishedStep(GetFullStepName());
+				onFinishedStep(fullStepName);
 
 			// Only usefull if this is the root. In the other cases the parent 
 			// will finish it on the next call to StartStep.
 			if (parent == null)
 			{
 				// We are really finishing the last step
-				currentStep = steps.Length - 1;
+				SetCurrentStep(steps.Length - 1);
 
-				OnChildChange(1, 1, name);
+				OnChildChange(1, 1, fullStepName.Take(fullStepName.Length - 1)
+					.ToArray());
 			}
 
-			currentStep = steps.Length;
+			SetCurrentStep(steps.Length);
 		}
 
 		internal void OnChildChange(int current, int total, string[] stepName)
 		{
 			var parentPercentage = current / (double) total;
 
-			var percentage = (steps.Take(currentStep)
-				.Sum() + steps[currentStep] * parentPercentage) / steps.Sum();
+			if (currentStepSum == null)
+			{
+				var tmp = 0;
+				for (int i = 0; i < currentStep; i++)
+					tmp += steps[i];
+				currentStepSum = tmp;
+			}
+
+			var percentage = (currentStepSum.Value + steps[currentStep] * parentPercentage) / stepsSum;
 
 			// If not finished, pass on as not finished (to avoid problems in the flat monitor)
 			var parentCurrent = (int) Math.Round(percentage * 1000);
@@ -228,7 +251,7 @@ namespace org.pescuma.progressmonitor.utils
 		private void SetCurrent(int current, int total, params string[] stepName)
 		{
 			if (parent == null)
-				filteredFlat.SetCurrent(current, total, stepName);
+				flat.SetCurrent(current, total, stepName);
 			else
 				parent.OnChildChange(current, total, stepName);
 		}
@@ -237,7 +260,7 @@ namespace org.pescuma.progressmonitor.utils
 		{
 			CheckRunning();
 
-			return new FlatToHierarchicalProgressMonitor(this, GetFullStepName());
+			return new FlatToHierarchicalProgressMonitor(this, fullStepName);
 		}
 
 		private void CheckRunning()
@@ -250,27 +273,27 @@ namespace org.pescuma.progressmonitor.utils
 
 		public void Report(string message, params object[] args)
 		{
-			filteredFlat.Report(message, args);
+			flat.Report(message, args);
 		}
 
 		public void ReportDetail(string message, params object[] args)
 		{
-			filteredFlat.ReportDetail(message, args);
+			flat.ReportDetail(message, args);
 		}
 
 		public void ReportWarning(string message, params object[] args)
 		{
-			filteredFlat.ReportWarning(message, args);
+			flat.ReportWarning(message, args);
 		}
 
 		public void ReportError(string message, params object[] args)
 		{
-			filteredFlat.ReportError(message, args);
+			flat.ReportError(message, args);
 		}
 
 		public bool WasCanceled
 		{
-			get { return filteredFlat.WasCanceled; }
+			get { return flat.WasCanceled; }
 		}
 	}
 }

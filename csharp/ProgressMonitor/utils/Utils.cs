@@ -94,6 +94,13 @@ namespace org.pescuma.progressmonitor.utils
 				result.Insert(0, string.Format("{0}{1}", val, name));
 		}
 
+		public static string[] ArrayAppendEmpty(string[] src, int elements)
+		{
+			var result = new string[src.Length + elements];
+			Array.Copy(src, result, src.Length);
+			return result;
+		}
+
 		// From http://stackoverflow.com/questions/3635564/greatest-common-divisor-from-a-set-of-more-than-2-integers
 		public static int GetGCD(int a, int b)
 		{

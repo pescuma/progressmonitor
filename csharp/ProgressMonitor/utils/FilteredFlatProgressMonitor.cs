@@ -10,6 +10,11 @@
 		public bool DontOutputReportWarnings = false;
 		public bool DontOutputReportErrors = false;
 
+		public FlatProgressMonitor Original
+		{
+			get { return next; }
+		}
+
 		public FilteredFlatProgressMonitor(FlatProgressMonitor next)
 		{
 			this.next = next;
