@@ -5,6 +5,8 @@ namespace org.pescuma.progressmonitor.utils
 {
 	public class FlatToHierarchicalProgressMonitor : ProgressMonitor
 	{
+		private const int TOTAL_STEPS_FOR_FLAT = 1000;
+
 		private readonly FilteredFlatProgressMonitor flat;
 		private readonly FlatToHierarchicalProgressMonitor parent;
 		private readonly string[] fullStepName;
@@ -15,7 +17,7 @@ namespace org.pescuma.progressmonitor.utils
 
 		// Cached data
 		private int stepsSum;
-		private int? currentStepSum;
+		private int currentStepSum;
 
 		private string CurrentStepName
 		{
@@ -96,12 +98,6 @@ namespace org.pescuma.progressmonitor.utils
 		{
 		}
 
-		private void SetCurrentStep(int value)
-		{
-			currentStep = value;
-			currentStepSum = null;
-		}
-
 		public IDisposable ConfigureSteps(params int[] aSteps)
 		{
 			if (WasConfigured)
@@ -175,7 +171,8 @@ namespace org.pescuma.progressmonitor.utils
 
 				if (hasStarted && CurrentStepName == stepName && lastStartStepTickCount - tickCount > minWait.Value)
 				{
-					SetCurrentStep(currentStep + 1);
+					currentStepSum += steps[currentStep];
+					currentStep++;
 					return;
 				}
 
@@ -189,14 +186,15 @@ namespace org.pescuma.progressmonitor.utils
 				var onFinishedStep = root.BeforeFinishedStep;
 				if (onFinishedStep != null)
 					onFinishedStep(fullStepName);
-			}
 
-			SetCurrentStep(currentStep + 1);
+				currentStepSum += steps[currentStep];
+			}
+			currentStep++;
 			CurrentStepName = stepName;
 
 			var newName = fullStepName;
 
-			OnChildChange(0, 1, newName);
+			OnChildChange(0, newName);
 
 			var onOnStartedStep = root.AfterStartedStep;
 			if (onOnStartedStep != null)
@@ -212,48 +210,28 @@ namespace org.pescuma.progressmonitor.utils
 			if (onFinishedStep != null)
 				onFinishedStep(fullStepName);
 
-			// Only usefull if this is the root. In the other cases the parent 
+			currentStep = steps.Length;
+
+			// Only need to set current if this is the root. In the other cases the parent 
 			// will finish it on the next call to StartStep.
 			if (parent == null)
-			{
-				// We are really finishing the last step
-				SetCurrentStep(steps.Length - 1);
-
-				OnChildChange(1, 1, fullStepName.Take(fullStepName.Length - 1)
+				flat.SetCurrent(TOTAL_STEPS_FOR_FLAT, TOTAL_STEPS_FOR_FLAT, fullStepName.Take(fullStepName.Length - 1)
 					.ToArray());
-			}
-
-			SetCurrentStep(steps.Length);
 		}
 
-		internal void OnChildChange(int current, int total, string[] stepName)
+		internal void OnChildChange(float parentPercentage, string[] stepName)
 		{
-			var parentPercentage = current / (double) total;
+			var percentage = (currentStepSum + steps[currentStep] * parentPercentage) / stepsSum;
 
-			if (currentStepSum == null)
-			{
-				var tmp = 0;
-				for (int i = 0; i < currentStep; i++)
-					tmp += steps[i];
-				currentStepSum = tmp;
-			}
-
-			var percentage = (currentStepSum.Value + steps[currentStep] * parentPercentage) / stepsSum;
-
-			// If not finished, pass on as not finished (to avoid problems in the flat monitor)
-			var parentCurrent = (int) Math.Round(percentage * 1000);
-			if (current < total)
-				parentCurrent = Math.Min(999, parentCurrent);
-
-			SetCurrent(parentCurrent, 1000, stepName);
-		}
-
-		private void SetCurrent(int current, int total, params string[] stepName)
-		{
 			if (parent == null)
-				flat.SetCurrent(current, total, stepName);
+			{
+				var current = Math.Min((int) (percentage * TOTAL_STEPS_FOR_FLAT), TOTAL_STEPS_FOR_FLAT - 1);
+				flat.SetCurrent(current, TOTAL_STEPS_FOR_FLAT, stepName);
+			}
 			else
-				parent.OnChildChange(current, total, stepName);
+			{
+				parent.OnChildChange(percentage, stepName);
+			}
 		}
 
 		public ProgressMonitor CreateSubMonitor()
