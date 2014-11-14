@@ -1,1 +1,1 @@
-nuget Pack ..\ProgressMonitor\ProgressMonitor.csproj -Symbols
+nuget Pack ..\ProgressMonitor\ProgressMonitor.csproj -Build -Symbols -Properties Configuration=Release
