@@ -75,6 +75,7 @@
     <Compile Include="console\widget\PercentageWidget.cs" />
     <Compile Include="console\widget\StepNameWidget.cs" />
     <Compile Include="FlatProgressMonitor.cs" />
+    <Compile Include="utils\ObservableProgressMonitor.cs" />
     <Compile Include="utils\ThrowOnCancelledProgressMonitor.cs" />
     <Compile Include="utils\Utils.cs" />
   </ItemGroup>
