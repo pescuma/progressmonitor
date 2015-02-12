@@ -11,7 +11,7 @@ namespace org.pescuma.progressmonitor.console
 
 		protected bool HasFinished;
 
-		public int MinOutupWaitInMs
+		public virtual int MinOutupWaitInMs
 		{
 			get { return 500; }
 		}

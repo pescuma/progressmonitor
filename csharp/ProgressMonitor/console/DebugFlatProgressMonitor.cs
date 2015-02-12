@@ -9,20 +9,13 @@ namespace org.pescuma.progressmonitor.console
 	{
 		private readonly WidgetCollection widgets;
 
+		public override int MinOutupWaitInMs
+		{
+			get { return 2000; }
+		}
+
 		public DebugFlatProgressMonitor(params ConsoleWidget[] widgets)
 		{
-			if (widgets == null || widgets.Length < 1)
-				widgets = new ConsoleWidget[]
-				{
-					new StepNameWidget(),
-					new PercentageWidget(),
-					new BarWidget(),
-					"Elapsed",
-					new ElapsedWidget(),
-					"| ETA",
-					new ETAWidget()
-				};
-
 			this.widgets = new WidgetCollection(widgets);
 		}
 
