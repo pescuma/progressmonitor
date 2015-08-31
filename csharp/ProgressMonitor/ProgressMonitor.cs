@@ -19,7 +19,8 @@ namespace org.pescuma.progressmonitor
 		/// Finishes the previous step and starts the next one.
 		/// </summary>
 		/// <param name="stepName">The next step name. Optional.</param>
-		void StartStep(string stepName = null);
+		/// <param name="args">If at least one argument, the message will be passed to string.Format</param>
+		void StartStep(string stepName = null, params object[] args);
 
 		/// <summary>
 		/// Create a monitor for sub-steps of the current step.

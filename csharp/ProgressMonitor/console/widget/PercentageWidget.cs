@@ -8,20 +8,15 @@ namespace org.pescuma.progressmonitor.console.widget
 		{
 		}
 
-		public override bool Grow
+		public override AcceptableSizes ComputeSize(int current, int total, double percent, string[] stepName)
 		{
-			get { return false; }
-		}
-
-		public override int ComputeSize(int current, int total, double percent, string[] stepName)
-		{
-			var text = Format(percent);
-			return text.Length;
+			string text = Format(percent);
+			return new AcceptableSizes(text.Length, text.Length, false);
 		}
 
 		public override void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName)
 		{
-			var text = Format(percent);
+			string text = Format(percent);
 			writer(text);
 		}
 

@@ -151,16 +151,16 @@ namespace org.pescuma.progressmonitor.utils
 			return cur;
 		}
 
-		public void StartStep(string stepName = null)
+		public void StartStep(string stepName = null, params object[] args)
 		{
 			if (currentStep + 1 >= steps.Length)
 			{
-				ReportDetail("[ProgressMonitor] All configured steps were already used (inside " + string.Join(" ", fullStepName)
+				ReportDetail("[ProgressMonitor] All configured steps were already used (inside " + string.Join(" - ", fullStepName)
 					.Trim() + ")");
 				return;
 			}
 
-			stepName = stepName ?? "";
+			stepName = Utils.Format(stepName ?? "", args);
 
 			var hasStarted = HasStarted;
 

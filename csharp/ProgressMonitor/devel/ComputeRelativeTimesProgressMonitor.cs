@@ -35,15 +35,15 @@ namespace org.pescuma.progressmonitor.devel
 			});
 		}
 
-		public void StartStep(string stepName = null)
+		public void StartStep(string stepName = null, params object[] args)
 		{
 			if (currentStep >= 0)
 				OnFinishedStep();
 
-			next.StartStep(stepName);
+			next.StartStep(stepName, args);
 
 			currentStep++;
-			steps[currentStep].Name = stepName;
+			steps[currentStep].Name = Utils.Format(stepName ?? "", args);
 			start = DateTime.Now;
 		}
 

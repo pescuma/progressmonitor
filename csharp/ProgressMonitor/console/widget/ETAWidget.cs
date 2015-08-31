@@ -13,15 +13,10 @@ namespace org.pescuma.progressmonitor.console.widget
 			start = DateTime.Now;
 		}
 
-		public override bool Grow
-		{
-			get { return false; }
-		}
-
-		public override int ComputeSize(int current, int total, double percent, string[] stepName)
+		public override AcceptableSizes ComputeSize(int current, int total, double percent, string[] stepName)
 		{
 			if (percent < 0.01)
-				return 0;
+				return AcceptableSizes.Empty;
 
 			var elapsedTime = (DateTime.Now - start).TotalMilliseconds / 1000;
 			var totalTime = elapsedTime / percent;
@@ -29,7 +24,7 @@ namespace org.pescuma.progressmonitor.console.widget
 
 			eta = Utils.FormatSeconds(toGo);
 
-			return eta.Length;
+			return new AcceptableSizes(eta.Length, eta.Length, false);
 		}
 
 		public override void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName)

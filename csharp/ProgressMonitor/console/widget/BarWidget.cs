@@ -8,14 +8,9 @@ namespace org.pescuma.progressmonitor.console.widget
 		{
 		}
 
-		public override bool Grow
+		public override AcceptableSizes ComputeSize(int current, int total, double percent, string[] stepName)
 		{
-			get { return true; }
-		}
-
-		public override int ComputeSize(int current, int total, double percent, string[] stepName)
-		{
-			return 5;
+			return new AcceptableSizes(5, 5, true);
 		}
 
 		public override void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName)
@@ -24,11 +19,11 @@ namespace org.pescuma.progressmonitor.console.widget
 
 			var hashWidth = (int) Math.Round((width - 2) * percent);
 			if (hashWidth > 0)
-				writer(new String('#', hashWidth));
+				writer(new string('#', hashWidth));
 
 			var spaceWidth = width - 2 - hashWidth;
 			if (spaceWidth > 0)
-				writer(new String(' ', spaceWidth));
+				writer(new string(' ', spaceWidth));
 
 			writer("]");
 		}

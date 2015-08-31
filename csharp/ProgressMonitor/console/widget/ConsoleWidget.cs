@@ -6,9 +6,7 @@ namespace org.pescuma.progressmonitor.console.widget
 	{
 		public abstract void Started();
 
-		public abstract bool Grow { get; }
-
-		public abstract int ComputeSize(int current, int total, double percent, string[] stepName);
+		public abstract AcceptableSizes ComputeSize(int current, int total, double percent, string[] stepName);
 
 		public abstract void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName);
 

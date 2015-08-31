@@ -27,11 +27,11 @@ namespace org.pescuma.progressmonitor.utils
 			return next.ConfigureSteps(steps);
 		}
 
-		public void StartStep(string stepName = null)
+		public void StartStep(string stepName = null, params object[] args)
 		{
 			ThrowOnCancel();
 
-			next.StartStep(stepName);
+			next.StartStep(stepName, args);
 		}
 
 		public ProgressMonitor CreateSubMonitor()

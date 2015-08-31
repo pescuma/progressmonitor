@@ -31,76 +31,141 @@ namespace org.pescuma.progressmonitor.console.widget
 				widget.Started();
 		}
 
-		public override bool Grow
+		public override AcceptableSizes ComputeSize(int current, int total, double percent, string[] stepName)
 		{
-			get { return widgets.Any(w => w.Grow); }
+			List<WidgetSize> ws = GetWidgetSizes(current, total, percent, stepName);
+
+			return ComputeSize(ws);
 		}
 
-		public override int ComputeSize(int current, int total, double percent, string[] stepName)
+		private static AcceptableSizes ComputeSize(List<WidgetSize> ws)
 		{
-			var result = 0;
+			int min = 0;
+			int max = 0;
+			bool grow = false;
 
-			foreach (var widget in widgets)
+			for (int i = 0; i < ws.Count; i++)
 			{
-				var innerWidth = widget.ComputeSize(current, total, percent, stepName);
-				if (innerWidth < 1)
-					continue;
+				WidgetSize w = ws[i];
 
-				if (result > 0)
-					result += 1;
+				if (i > 0)
+				{
+					min += 1;
+					max += 1;
+				}
 
-				result += innerWidth;
+				min += w.DesiredSize.Min;
+				max += w.DesiredSize.Max;
+				grow = grow || w.DesiredSize.GrowToUseEmptySpace;
 			}
 
-			return result;
+			return new AcceptableSizes(min, max, grow);
 		}
 
 		public override void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName)
 		{
-			var widths = new Dictionary<ConsoleWidget, int>();
+			List<WidgetSize> ws = GetWidgetSizes(current, total, percent, stepName);
 
-			var remaining = width;
+			if (ws.Count < 1)
+				return;
 
-			foreach (var widget in widgets)
+			AcceptableSizes desired = ComputeSize(ws);
+
+			int remaining = width;
+
+			for (int i = 0; i < ws.Count && remaining > 0; i++)
 			{
-				var innerWidth = widget.ComputeSize(current, total, percent, stepName);
-				if (innerWidth < 1)
-					continue;
+				WidgetSize w = ws[i];
 
-				var spacing = (widths.Any() ? 1 : 0);
+				if (i > 0)
+					remaining--;
 
-				if (remaining < innerWidth + spacing)
-					continue;
+				if (width >= desired.Max)
+				{
+					w.Size = w.DesiredSize.Max;
+				}
+				else if (width > desired.Min)
+				{
+					w.Size = w.DesiredSize.Min
+					         + (int) ((w.DesiredSize.Max - w.DesiredSize.Min) / (float) (desired.Max - desired.Min) * (width - desired.Min));
+				}
+				else
+				{
+					w.Size = Between(w.DesiredSize.Min, 0, remaining);
+				}
 
-				remaining -= innerWidth + spacing;
-				widths[widget] = innerWidth;
+				remaining -= w.Size;
 			}
 
-			var used = widgets.Where(widths.ContainsKey)
+			// Remove the ones that don't fit in screen
+			ws = ws.Where(w => w.Size > 0)
 				.ToList();
 
-			var widgetsToGrow = used.Count(w => w.Grow);
-			if (widgetsToGrow > 0)
+			if (remaining > 0)
 			{
-				var toGrow = width - (used.Count - 1) - used.Sum(w => widths[w]);
+				List<WidgetSize> toGrow = ws.Where(w => w.DesiredSize.GrowToUseEmptySpace)
+					.ToList();
 
-				var each = toGrow / widgetsToGrow;
-				foreach (var w in used.Where(w => w.Grow))
-					widths[w] += each;
-
-				toGrow -= each * widgetsToGrow;
-
-				widths[used.First(w => w.Grow)] += toGrow;
+				foreach (WidgetSize w in toGrow)
+				{
+					int toUse = remaining / toGrow.Count;
+					w.Size += toUse;
+					remaining -= toUse;
+				}
 			}
 
-			for (var i = 0; i < used.Count; i++)
+			if (remaining > 0)
+			{
+				// Left overs from divisions
+				WidgetSize growable = ws.LastOrDefault(w => w.DesiredSize.GrowToUseEmptySpace);
+				if (growable != null)
+				{
+					growable.Size += remaining;
+					remaining = 0;
+				}
+			}
+
+			for (var i = 0; i < ws.Count; i++)
 			{
 				if (i > 0)
 					writer(" ");
 
-				var w = used[i];
-				w.Output(writer, widths[w], current, total, percent, stepName);
+				WidgetSize w = ws[i];
+				w.Widget.Output(writer, w.Size, current, total, percent, stepName);
 			}
+
+			if (remaining > 0)
+				writer(new string(' ', remaining));
+		}
+
+		private List<WidgetSize> GetWidgetSizes(int current, int total, double percent, string[] stepName)
+		{
+			var ws = new List<WidgetSize>();
+
+			foreach (ConsoleWidget widget in widgets)
+			{
+				AcceptableSizes desired = widget.ComputeSize(current, total, percent, stepName);
+				if (desired.Max < 1)
+					continue;
+
+				ws.Add(new WidgetSize { Widget = widget, DesiredSize = desired });
+			}
+			return ws;
+		}
+
+		private int Between(int val, int min, int max)
+		{
+			if (max < min)
+				return min;
+
+			return Math.Min(Math.Max(val, min), max);
+		}
+
+		private class WidgetSize
+		{
+			public ConsoleWidget Widget;
+			public AcceptableSizes DesiredSize;
+			public int Size;
 		}
 	}
 }

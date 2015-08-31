@@ -5,61 +5,40 @@ namespace org.pescuma.progressmonitor.console.widget
 {
 	public class StepNameWidget : ConsoleWidget
 	{
-		private readonly Func<string[], string> formater = DefaultFormater;
-		private readonly int maxWidth = 30;
+		private readonly Func<string[], string> formater;
 
-		public StepNameWidget(Func<string[], string> formater, int maxWidth)
+		public StepNameWidget(Func<string[], string> formater = null)
 		{
-			this.formater = formater;
-			this.maxWidth = maxWidth;
-		}
-
-		public StepNameWidget(Func<string[], string> formater)
-		{
-			this.formater = formater;
-			maxWidth = int.MaxValue;
-		}
-
-		public StepNameWidget(int maxWidth)
-		{
-			this.maxWidth = maxWidth;
-		}
-
-		public StepNameWidget()
-		{
+			this.formater = formater ?? DefaultFormater;
 		}
 
 		public override void Started()
 		{
 		}
 
-		public override bool Grow
+		public override AcceptableSizes ComputeSize(int current, int total, double percent, string[] stepName)
 		{
-			get { return false; }
-		}
+			string text = formater(stepName) ?? "";
 
-		public override int ComputeSize(int current, int total, double percent, string[] stepName)
-		{
-			var text = formater(stepName) ?? "";
-			return Math.Min(text.Length, maxWidth);
+			return new AcceptableSizes(3, text.Length, false);
 		}
 
 		public override void Output(Action<string> writer, int width, int current, int total, double percent, string[] stepName)
 		{
-			var text = formater(stepName) ?? "";
+			string text = formater(stepName) ?? "";
 
-			if (text.Length > maxWidth)
+			if (text.Length > width)
 			{
-				if (maxWidth > 5)
-					text = text.Substring(0, maxWidth - 3) + "...";
+				if (width >= 5)
+					text = text.Substring(0, width - 1) + "\u2026";
 				else
-					text = text.Substring(0, maxWidth);
+					text = text.Substring(0, width);
 			}
 
 			writer(text);
 		}
 
-		public static string DefaultFormater(string[] name)
+		private static string DefaultFormater(string[] name)
 		{
 			if (name == null)
 				return "";

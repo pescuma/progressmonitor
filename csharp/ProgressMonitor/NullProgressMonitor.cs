@@ -25,7 +25,7 @@ namespace org.pescuma.progressmonitor
 			return new NullIDisposable();
 		}
 
-		public void StartStep(string stepName = null)
+		public void StartStep(string stepName = null, params object[] args)
 		{
 		}
 

@@ -45,9 +45,9 @@ namespace org.pescuma.progressmonitor.utils
 			return result;
 		}
 
-		public void StartStep(string stepName = null)
+		public void StartStep(string stepName = null, params object[] args)
 		{
-			next.StartStep(stepName);
+			next.StartStep(stepName, args);
 
 			events.NotifyStartStep();
 		}

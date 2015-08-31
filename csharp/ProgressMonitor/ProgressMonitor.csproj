@@ -22,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\ProgressMonitor.XML</DocumentationFile>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -53,6 +54,7 @@
     <Compile Include="console\DebugProgressMonitor.cs" />
     <Compile Include="console\MachineReadableConsoleProgressMonitor.cs" />
     <Compile Include="console\ConsoleProgressMonitor.cs" />
+    <Compile Include="console\widget\AcceptableSizes.cs" />
     <Compile Include="console\widget\ElapsedWidget.cs" />
     <Compile Include="console\widget\TextWidget.cs" />
     <Compile Include="console\widget\WidgetCollection.cs" />
