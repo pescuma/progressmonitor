@@ -5,7 +5,7 @@ namespace org.pescuma.progressmonitor.utils
 {
 	public class FlatToHierarchicalProgressMonitor : ProgressMonitor
 	{
-		private const int TOTAL_STEPS_FOR_FLAT = 1000;
+		private const int totalStepsForFlat = 1000;
 
 		private readonly FilteredFlatProgressMonitor flat;
 		private readonly FlatToHierarchicalProgressMonitor parent;
@@ -13,7 +13,6 @@ namespace org.pescuma.progressmonitor.utils
 
 		private int[] steps;
 		private int currentStep = -1;
-		private int lastStartStepTickCount;
 
 		// Cached data
 		private int stepsSum;
@@ -145,7 +144,7 @@ namespace org.pescuma.progressmonitor.utils
 
 		private FlatToHierarchicalProgressMonitor GetRoot()
 		{
-			var cur = this;
+			FlatToHierarchicalProgressMonitor cur = this;
 			while (cur.parent != null)
 				cur = cur.parent;
 			return cur;
@@ -162,28 +161,11 @@ namespace org.pescuma.progressmonitor.utils
 
 			stepName = Utils.Format(stepName ?? "", args);
 
-			var hasStarted = HasStarted;
+			FlatToHierarchicalProgressMonitor root = GetRoot();
 
-			var minWait = MinOutupWaitInMs;
-			if (minWait != null)
+			if (HasStarted)
 			{
-				var tickCount = Environment.TickCount;
-
-				if (hasStarted && CurrentStepName == stepName && lastStartStepTickCount - tickCount > minWait.Value)
-				{
-					currentStepSum += steps[currentStep];
-					currentStep++;
-					return;
-				}
-
-				lastStartStepTickCount = tickCount;
-			}
-
-			var root = GetRoot();
-
-			if (hasStarted)
-			{
-				var onFinishedStep = root.BeforeFinishedStep;
+				Action<string[]> onFinishedStep = root.BeforeFinishedStep;
 				if (onFinishedStep != null)
 					onFinishedStep(fullStepName);
 
@@ -192,20 +174,18 @@ namespace org.pescuma.progressmonitor.utils
 			currentStep++;
 			CurrentStepName = stepName;
 
-			var newName = fullStepName;
+			UpdateParent(0, fullStepName);
 
-			OnChildChange(0, newName);
-
-			var onOnStartedStep = root.AfterStartedStep;
+			Action<string[]> onOnStartedStep = root.AfterStartedStep;
 			if (onOnStartedStep != null)
-				onOnStartedStep(newName);
+				onOnStartedStep(fullStepName);
 		}
 
 		public void Finished()
 		{
 			CheckRunning();
 
-			var onFinishedStep = GetRoot()
+			Action<string[]> onFinishedStep = GetRoot()
 				.BeforeFinishedStep;
 			if (onFinishedStep != null)
 				onFinishedStep(fullStepName);
@@ -215,23 +195,48 @@ namespace org.pescuma.progressmonitor.utils
 			// Only need to set current if this is the root. In the other cases the parent 
 			// will finish it on the next call to StartStep.
 			if (parent == null)
-				flat.SetCurrent(TOTAL_STEPS_FOR_FLAT, TOTAL_STEPS_FOR_FLAT, fullStepName.Take(fullStepName.Length - 1)
+				UpdateFlatMonitor(totalStepsForFlat, fullStepName.Take(fullStepName.Length - 1)
 					.ToArray());
 		}
 
-		internal void OnChildChange(float parentPercentage, string[] stepName)
+		internal void UpdateParent(float childPercentage, string[] stepName)
 		{
-			var percentage = (currentStepSum + steps[currentStep] * parentPercentage) / stepsSum;
+			float percentage = (currentStepSum + steps[currentStep] * childPercentage) / stepsSum;
 
 			if (parent == null)
 			{
-				var current = Math.Min((int) (percentage * TOTAL_STEPS_FOR_FLAT), TOTAL_STEPS_FOR_FLAT - 1);
-				flat.SetCurrent(current, TOTAL_STEPS_FOR_FLAT, stepName);
+				int current = Math.Min((int) (percentage * totalStepsForFlat), totalStepsForFlat - 1);
+				UpdateFlatMonitor(current, stepName);
 			}
 			else
 			{
-				parent.OnChildChange(percentage, stepName);
+				parent.UpdateParent(percentage, stepName);
 			}
+		}
+
+		private int lastStartStepTickCount = -1;
+		private int lastCurrent = -1;
+		private string[] lastStepName;
+
+		private void UpdateFlatMonitor(int current, string[] stepName)
+		{
+			int now = Environment.TickCount;
+
+			if (current != totalStepsForFlat)
+			{
+				if (current == lastCurrent && stepName.SequenceEqual(lastStepName))
+					return;
+
+				int? minWait = MinOutupWaitInMs;
+				if (minWait != null && now - lastStartStepTickCount < minWait.Value)
+					return;
+			}
+
+			flat.SetCurrent(current, totalStepsForFlat, stepName);
+
+			lastStartStepTickCount = now;
+			lastCurrent = current;
+			lastStepName = stepName;
 		}
 
 		public ProgressMonitor CreateSubMonitor()
