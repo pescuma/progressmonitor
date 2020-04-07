@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using org.pescuma.progressmonitor.console.widget;
 using org.pescuma.progressmonitor.utils;
 
@@ -8,19 +9,23 @@ namespace org.pescuma.progressmonitor.console
 	public class ConsoleFlatProgressMonitor : BaseConsoleFlatProgressMonitor
 	{
 		private readonly WidgetCollection widgets;
-		private bool showingProgress;
+		private bool atEndOfProgressLine;
 		private int lastCurrent;
 		private int lastTotal;
+		private int? consoleWidth;
 
 		public ConsoleFlatProgressMonitor(params ConsoleWidget[] widgets)
 		{
 			this.widgets = new WidgetCollection(widgets);
 		}
 
-		private int ConsoleWidth
+		public int ConsoleWidth
 		{
 			get
 			{
+				if (consoleWidth != null)
+					return consoleWidth.Value;
+
 				try
 				{
 					return Console.BufferWidth - 1;
@@ -30,6 +35,7 @@ namespace org.pescuma.progressmonitor.console
 					return 79;
 				}
 			}
+			set { consoleWidth = value; }
 		}
 
 		protected override void OnStart()
@@ -39,35 +45,49 @@ namespace org.pescuma.progressmonitor.console
 
 		protected override void WriteToConsole(int current, int total, string[] stepName)
 		{
-			if (showingProgress)
+			if (atEndOfProgressLine)
 				ClearLine();
 
 			lastCurrent = current;
 			lastTotal = total;
 
-			if (!HasFinished)
+			if (!HasFinished || ConsoleCachedInfo.IsOutputRedirected)
 				OutputProgress();
 		}
 
 		private void ClearLine()
 		{
-			Console.Write("\r");
-			Console.Write(new String(' ', ConsoleWidth));
-			Console.Write("\r");
+			if (!ConsoleCachedInfo.IsOutputRedirected)
+			{
+				Console.SetCursorPosition(0, Console.CursorTop);
+				Console.Write(new string(' ', ConsoleWidth));
+				Console.SetCursorPosition(0, Console.CursorTop);
 
-			showingProgress = false;
+				atEndOfProgressLine = false;
+			}
 		}
 
 		private void OutputProgress()
 		{
-			widgets.Output(Console.Write, ConsoleWidth, lastCurrent, lastTotal, LastPercent, LastStepName);
+			var sb = new StringBuilder();
+			widgets.Output(t => sb.Append(t), ConsoleWidth, lastCurrent, lastTotal, LastPercent, LastStepName);
+			var line = sb.ToString();
 
-			showingProgress = true;
+			if (ConsoleCachedInfo.IsOutputRedirected)
+			{
+				Console.WriteLine(line);
+				atEndOfProgressLine = false;
+			}
+			else
+			{
+				Console.Write(line);
+				atEndOfProgressLine = true;
+			}
 		}
 
 		protected override void ReportWithColor(string message, object[] args, ConsoleColor? color)
 		{
-			var wasShowingProgress = showingProgress;
+			bool wasShowingProgress = atEndOfProgressLine;
 
 			if (wasShowingProgress)
 				ClearLine();
@@ -76,6 +96,16 @@ namespace org.pescuma.progressmonitor.console
 
 			if (wasShowingProgress)
 				OutputProgress();
+		}
+
+		private static class ConsoleCachedInfo
+		{
+			public static readonly bool IsOutputRedirected;
+
+			static ConsoleCachedInfo()
+			{
+				IsOutputRedirected = Console.IsOutputRedirected;
+			}
 		}
 	}
 }

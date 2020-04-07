@@ -27,7 +27,7 @@ namespace org.pescuma.progressmonitor.console.widget
 
 		public override void Started()
 		{
-			foreach (var widget in widgets)
+			foreach (ConsoleWidget widget in widgets)
 				widget.Started();
 		}
 
