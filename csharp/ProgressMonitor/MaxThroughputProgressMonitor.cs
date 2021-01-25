@@ -1,7 +1,7 @@
 ﻿namespace org.pescuma.progressmonitor
 {
-	public interface MaxThroughputProgressMonitor
-	{
-		int MinOutupWaitInMs { get; }
-	}
+    public interface MaxThroughputProgressMonitor
+    {
+        int MinOutupWaitInMs { get; }
+    }
 }

@@ -2,75 +2,75 @@
 
 namespace org.pescuma.progressmonitor.utils
 {
-	/// <summary>
-	/// Throws an OperationCanceledException when a request was requested and a step related method is called.
-	/// </summary>
-	public class ThrowOnCancelledProgressMonitor : ProgressMonitor
-	{
-		private readonly ProgressMonitor next;
+    /// <summary>
+    /// Throws an OperationCanceledException when a request was requested and a step related method is called.
+    /// </summary>
+    public class ThrowOnCancelledProgressMonitor : ProgressMonitor
+    {
+        private readonly ProgressMonitor next;
 
-		public ThrowOnCancelledProgressMonitor(ProgressMonitor next)
-		{
-			this.next = next;
-		}
+        public ThrowOnCancelledProgressMonitor(ProgressMonitor next)
+        {
+            this.next = next;
+        }
 
-		private void ThrowOnCancel()
-		{
-			if (WasCanceled)
-				throw new OperationCanceledException();
-		}
+        private void ThrowOnCancel()
+        {
+            if (WasCanceled)
+                throw new OperationCanceledException();
+        }
 
-		public IDisposable ConfigureSteps(params int[] steps)
-		{
-			ThrowOnCancel();
+        public IDisposable ConfigureSteps(params int[] steps)
+        {
+            ThrowOnCancel();
 
-			return next.ConfigureSteps(steps);
-		}
+            return next.ConfigureSteps(steps);
+        }
 
-		public void StartStep(string stepName = null, params object[] args)
-		{
-			ThrowOnCancel();
+        public void StartStep(string stepName = null, params object[] args)
+        {
+            ThrowOnCancel();
 
-			next.StartStep(stepName, args);
-		}
+            next.StartStep(stepName, args);
+        }
 
-		public ProgressMonitor CreateSubMonitor()
-		{
-			ThrowOnCancel();
+        public ProgressMonitor CreateSubMonitor()
+        {
+            ThrowOnCancel();
 
-			return new ThrowOnCancelledProgressMonitor(next.CreateSubMonitor());
-		}
+            return new ThrowOnCancelledProgressMonitor(next.CreateSubMonitor());
+        }
 
-		public void Finished()
-		{
-			ThrowOnCancel();
+        public void Finished()
+        {
+            ThrowOnCancel();
 
-			next.Finished();
-		}
+            next.Finished();
+        }
 
-		public void Report(string message, params object[] args)
-		{
-			next.Report(message, args);
-		}
+        public void Report(string message, params object[] args)
+        {
+            next.Report(message, args);
+        }
 
-		public void ReportDetail(string message, params object[] args)
-		{
-			next.ReportDetail(message, args);
-		}
+        public void ReportDetail(string message, params object[] args)
+        {
+            next.ReportDetail(message, args);
+        }
 
-		public void ReportWarning(string message, params object[] args)
-		{
-			next.ReportWarning(message, args);
-		}
+        public void ReportWarning(string message, params object[] args)
+        {
+            next.ReportWarning(message, args);
+        }
 
-		public void ReportError(string message, params object[] args)
-		{
-			next.ReportError(message, args);
-		}
+        public void ReportError(string message, params object[] args)
+        {
+            next.ReportError(message, args);
+        }
 
-		public bool WasCanceled
-		{
-			get { return next.WasCanceled; }
-		}
-	}
+        public bool WasCanceled
+        {
+            get { return next.WasCanceled; }
+        }
+    }
 }

@@ -2,52 +2,52 @@
 
 namespace org.pescuma.progressmonitor
 {
-	public class NullProgressMonitor : ProgressMonitor
-	{
-		public void Report(string message, params object[] args)
-		{
-		}
+    public class NullProgressMonitor : ProgressMonitor
+    {
+        public void Report(string message, params object[] args)
+        {
+        }
 
-		public void ReportDetail(string message, params object[] args)
-		{
-		}
+        public void ReportDetail(string message, params object[] args)
+        {
+        }
 
-		public void ReportWarning(string message, params object[] args)
-		{
-		}
+        public void ReportWarning(string message, params object[] args)
+        {
+        }
 
-		public void ReportError(string message, params object[] args)
-		{
-		}
+        public void ReportError(string message, params object[] args)
+        {
+        }
 
-		public IDisposable ConfigureSteps(params int[] steps)
-		{
-			return new NullIDisposable();
-		}
+        public IDisposable ConfigureSteps(params int[] steps)
+        {
+            return new NullIDisposable();
+        }
 
-		public void StartStep(string stepName = null, params object[] args)
-		{
-		}
+        public void StartStep(string stepName = null, params object[] args)
+        {
+        }
 
-		public ProgressMonitor CreateSubMonitor()
-		{
-			return this;
-		}
+        public ProgressMonitor CreateSubMonitor()
+        {
+            return this;
+        }
 
-		public void Finished()
-		{
-		}
+        public void Finished()
+        {
+        }
 
-		public bool WasCanceled
-		{
-			get { return false; }
-		}
+        public bool WasCanceled
+        {
+            get { return false; }
+        }
 
-		private class NullIDisposable : IDisposable
-		{
-			public void Dispose()
-			{
-			}
-		}
-	}
+        private class NullIDisposable : IDisposable
+        {
+            public void Dispose()
+            {
+            }
+        }
+    }
 }

@@ -6,106 +6,120 @@ using org.pescuma.progressmonitor.utils;
 
 namespace org.pescuma.progressmonitor.console
 {
-	public class ConsoleFlatProgressMonitor : BaseConsoleFlatProgressMonitor
-	{
-		private readonly WidgetCollection widgets;
-		private bool atEndOfProgressLine;
-		private int lastCurrent;
-		private int lastTotal;
-		private int? consoleWidth;
+    public class ConsoleFlatProgressMonitor : BaseConsoleFlatProgressMonitor
+    {
+        private readonly WidgetCollection widgets;
+        private bool atEndOfProgressLine;
+        private int? consoleWidth;
+        private bool? isOutputRedirected;
 
-		public ConsoleFlatProgressMonitor(params ConsoleWidget[] widgets)
-		{
-			this.widgets = new WidgetCollection(widgets);
-		}
+        public ConsoleFlatProgressMonitor(params ConsoleWidget[] widgets)
+        {
+            this.widgets = new WidgetCollection(widgets);
+        }
 
-		public int ConsoleWidth
-		{
-			get
-			{
-				if (consoleWidth != null)
-					return consoleWidth.Value;
+        public int ConsoleWidth
+        {
+            get
+            {
+                if (consoleWidth != null)
+                    return consoleWidth.Value;
 
-				try
-				{
-					return Console.BufferWidth - 1;
-				}
-				catch (IOException)
-				{
-					return 79;
-				}
-			}
-			set { consoleWidth = value; }
-		}
+                try
+                {
+                    return Console.BufferWidth - 1;
+                }
+                catch (IOException)
+                {
+                    return 79;
+                }
+            }
+            set { consoleWidth = value; }
+        }
 
-		protected override void OnStart()
-		{
-			widgets.Started();
-		}
+        public bool IsOutputRedirected
+        {
+            get
+            {
+                if (isOutputRedirected != null)
+                    return isOutputRedirected.Value;
 
-		protected override void WriteToConsole(int current, int total, string[] stepName)
-		{
-			if (atEndOfProgressLine)
-				ClearLine();
+                try
+                {
+                    isOutputRedirected = Console.IsOutputRedirected;
+                }
+                catch (IOException)
+                {
+                    isOutputRedirected = true;
+                }
 
-			lastCurrent = current;
-			lastTotal = total;
+                return isOutputRedirected.Value;
+            }
+            set { isOutputRedirected = value; }
+        }
 
-			if (!HasFinished || ConsoleCachedInfo.IsOutputRedirected)
-				OutputProgress();
-		}
+        protected override void OnStart()
+        {
+            widgets.Started();
+        }
 
-		private void ClearLine()
-		{
-			if (!ConsoleCachedInfo.IsOutputRedirected)
-			{
-				Console.SetCursorPosition(0, Console.CursorTop);
-				Console.Write(new string(' ', ConsoleWidth));
-				Console.SetCursorPosition(0, Console.CursorTop);
+        protected override void WriteToConsole(int current, int total, string[] stepName)
+        {
+            if (IsOutputRedirected && MinOutupWaitInMs > 0 && current < total)
+            {
+                // Really respect min output wait time
+                if (LastTickCount == null || Environment.TickCount - LastTickCount < MinOutupWaitInMs)
+                    return;
+            }
 
-				atEndOfProgressLine = false;
-			}
-		}
+            if (atEndOfProgressLine)
+                ClearLine();
 
-		private void OutputProgress()
-		{
-			var sb = new StringBuilder();
-			widgets.Output(t => sb.Append(t), ConsoleWidth, lastCurrent, lastTotal, LastPercent, LastStepName);
-			var line = sb.ToString();
+            if (current < total || IsOutputRedirected)
+                OutputProgress(current, total, stepName);
+        }
 
-			if (ConsoleCachedInfo.IsOutputRedirected)
-			{
-				Console.WriteLine(line);
-				atEndOfProgressLine = false;
-			}
-			else
-			{
-				Console.Write(line);
-				atEndOfProgressLine = true;
-			}
-		}
+        private void ClearLine()
+        {
+            if (!IsOutputRedirected)
+            {
+                Console.SetCursorPosition(0, Console.CursorTop);
+                Console.Write(new string(' ', ConsoleWidth));
+                Console.SetCursorPosition(0, Console.CursorTop);
 
-		protected override void ReportWithColor(string message, object[] args, ConsoleColor? color)
-		{
-			bool wasShowingProgress = atEndOfProgressLine;
+                atEndOfProgressLine = false;
+            }
+        }
 
-			if (wasShowingProgress)
-				ClearLine();
+        private void OutputProgress(int current, int total, string[] stepName)
+        {
+            var sb = new StringBuilder();
+            widgets.Output(t => sb.Append(t), ConsoleWidth, current, total, Percent(current, total), stepName);
+            var line = sb.ToString();
 
-			Utils.ConsoleWriteLine(color, message, args);
+            if (IsOutputRedirected)
+            {
+                Console.WriteLine(line);
+                atEndOfProgressLine = false;
+            }
+            else
+            {
+                Console.Write(line);
+                atEndOfProgressLine = true;
+            }
+        }
 
-			if (wasShowingProgress)
-				OutputProgress();
-		}
+        protected override void ReportWithColor(string message, object[] args, ConsoleColor? color)
+        {
+            bool wasShowingProgress = atEndOfProgressLine;
 
-		private static class ConsoleCachedInfo
-		{
-			public static readonly bool IsOutputRedirected;
+            if (wasShowingProgress)
+                ClearLine();
 
-			static ConsoleCachedInfo()
-			{
-				IsOutputRedirected = Console.IsOutputRedirected;
-			}
-		}
-	}
+            Utils.ConsoleWriteLine(color, message, args);
+
+            if (wasShowingProgress)
+                OutputProgress(LastCurrent, LastTotal, LastStepName);
+        }
+    }
 }
