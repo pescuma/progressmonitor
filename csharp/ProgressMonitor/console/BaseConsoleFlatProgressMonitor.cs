@@ -20,19 +20,19 @@ namespace org.pescuma.progressmonitor.console
             if (hasFinished)
                 throw new InvalidOperationException("Alteady finished");
 
-            var finished = (current >= total);
-            var tickCount = Environment.TickCount;
-            var percent = Percent(current, total);
+            bool finished = (current >= total);
+            int tickCount = Environment.TickCount;
+            double percent = Percent(current, total);
 
             bool output;
             if (finished)
                 output = true;
             else if (LastTickCount == null)
                 output = true;
+            else if (tickCount - LastTickCount.Value > MinOutupWaitInMs)
+                output = true;
             else if (!Utils.ArrayEqual(stepName, LastStepName))
                 output = true;
-            else if (tickCount - LastTickCount.Value < MinOutupWaitInMs)
-                output = false;
             else if (percent > Percent(LastCurrent, LastTotal))
                 output = true;
             else
