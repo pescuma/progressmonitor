@@ -55,7 +55,7 @@ namespace org.pescuma.progressmonitor.console
 
         protected double Percent(int current, int total)
         {
-            return Math.Floor(current / (double) total);
+            return Math.Floor(current * 100f / total);
         }
 
         protected virtual void OnStart()
