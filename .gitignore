@@ -167,3 +167,6 @@ $RECYCLE.BIN/
 
 # Nuget
 packages
+
+.idea/
+

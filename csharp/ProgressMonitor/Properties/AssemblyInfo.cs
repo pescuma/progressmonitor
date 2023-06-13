@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("ProgressMonitor")]
-[assembly: AssemblyCopyright("Copyright © Ricardo Pescuma Domenecci 2020")]
+[assembly: AssemblyCopyright("Copyright © Ricardo Pescuma Domenecci 2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
