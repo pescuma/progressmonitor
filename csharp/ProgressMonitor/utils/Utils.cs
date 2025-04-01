@@ -4,7 +4,7 @@ using System.Text;
 
 namespace org.pescuma.progressmonitor.utils
 {
-    public static class Utils
+    internal static class Utils
     {
         public static string Format(string message, params object[] args)
         {
