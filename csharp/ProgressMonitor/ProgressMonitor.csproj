@@ -1,47 +1,32 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{12F79392-99A9-47F1-AC73-B16E01CDF2E4}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>org.pescuma.progressmonitor</RootNamespace>
-    <AssemblyName>ProgressMonitor</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <TargetFrameworks>net4.8;net8.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\sat\SAT_DES\Source\TaxAssemblies\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\ProgressMonitor.XML</DocumentationFile>
-    <NoWarn>1591</NoWarn>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\ProgressMonitor.XML</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
-    <NoWarn>1591</NoWarn>
-  </PropertyGroup>
+
+
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+    <Copyright>Copyright © Ricardo Pescuma Domenecci 2023</Copyright>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Product>ProgressMonitor</Product>
+    <Title>ProgressMonitor</Title>
+    <AssemblyVersion>0.7.0.0</AssemblyVersion>
+    <Version>0.7.0.0</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>ProgressMonitor.Test, PublicKey=002400000480000094000000060200000024000052534131000400000100010011e4b1df63b1ec298d8195aa43d17d28f8eb17a0e2c3036d8475cca68f5ff9a632c67865a2dfdfd6f61e3f670ab7e3521405686f6d6fd355ccbbc266078ea8d8d185ec2a10089abaf2d78113f7e041637089a64cb3e028c9a5aa6ce48dbc50dc6f7b2aac1fab554ad1d9538d637639bde1689acb4c6c39e39a1d3139515fa4d1</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+  
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -51,48 +36,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="console\BaseConsoleFlatProgressMonitor.cs" />
-    <Compile Include="console\DebugFlatProgressMonitor.cs" />
-    <Compile Include="console\DebugProgressMonitor.cs" />
-    <Compile Include="console\MachineReadableConsoleProgressMonitor.cs" />
-    <Compile Include="console\ConsoleProgressMonitor.cs" />
-    <Compile Include="console\widget\AcceptableSizes.cs" />
-    <Compile Include="console\widget\ElapsedWidget.cs" />
-    <Compile Include="console\widget\TextWidget.cs" />
-    <Compile Include="console\widget\WidgetCollection.cs" />
-    <Compile Include="devel\ComputeRelativeTimesProgressMonitor.cs" />
-    <Compile Include="MaxThroughputProgressMonitor.cs" />
-    <Compile Include="NullProgressMonitor.cs" />
-    <Compile Include="ProgressCanceler.cs" />
-    <Compile Include="utils\ActionDisposable.cs" />
-    <Compile Include="utils\FilteredFlatProgressMonitor.cs" />
-    <Compile Include="utils\FlatToHierarchicalProgressMonitor.cs" />
-    <Compile Include="console\MachineReadableConsole.cs" />
-    <Compile Include="console\MachineReadableConsoleFlatProgressMonitor.cs" />
-    <Compile Include="ProgressReporter.cs" />
-    <Compile Include="ProgressMonitor.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="console\widget\BarWidget.cs" />
-    <Compile Include="console\ConsoleFlatProgressMonitor.cs" />
-    <Compile Include="console\widget\ConsoleWidget.cs" />
-    <Compile Include="console\widget\ETAWidget.cs" />
-    <Compile Include="console\widget\PercentageWidget.cs" />
-    <Compile Include="console\widget\StepNameWidget.cs" />
-    <Compile Include="FlatProgressMonitor.cs" />
-    <Compile Include="utils\ObservableProgressMonitor.cs" />
-    <Compile Include="utils\ThrowOnCancelledProgressMonitor.cs" />
-    <Compile Include="utils\Utils.cs" />
-  </ItemGroup>
+
   <ItemGroup>
     <None Include="key.snk" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
